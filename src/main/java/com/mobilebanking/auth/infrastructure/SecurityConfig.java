@@ -29,6 +29,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+    private final String[] freeResourceUrls = { "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+            "/swagger-resources/**", "/api-docs/**", "/aggregate/**", "/actuator/prometheus",
+            "/api/v1/auth/**" };
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -42,6 +45,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(freeResourceUrls).permitAll() // Free resources like Swagger UI
+                        .requestMatchers("/api/docs/**").permitAll() // Swagger or OpenAPI docs
                         .requestMatchers("/h2-console/**").permitAll() // For development only
                         .requestMatchers("/error").permitAll()
                         // Protected endpoints

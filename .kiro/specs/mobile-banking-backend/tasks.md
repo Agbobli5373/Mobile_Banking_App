@@ -87,7 +87,7 @@
   - Write integration tests for transfer API including edge cases
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 7.1, 7.2, 7.5_
 
-- [ ] 11. Build fund addition functionality
+- [x] 11. Build fund addition functionality
 
   - Extend WalletService with fund addition operations
   - Implement deposit workflow with transaction recording

@@ -4,11 +4,13 @@ import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
 import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
+import com.mobilebanking.transaction.api.dto.DepositRequest;
+import com.mobilebanking.transaction.api.dto.DepositResponse;
 import com.mobilebanking.transaction.api.dto.TransferRequest;
 import com.mobilebanking.transaction.api.dto.TransferResponse;
 import com.mobilebanking.transaction.application.WalletService;
 import com.mobilebanking.transaction.domain.Transaction;
-import com.mobilebanking.user.domain.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/wallet")
+@SecurityRequirement(name = "bearer-key")
 public class WalletController {
 
     private static final Logger logger = LoggerFactory.getLogger(WalletController.class);
@@ -116,6 +119,56 @@ public class WalletController {
             logger.error("Unexpected error during money transfer", e);
             return ResponseEntity.internalServerError()
                     .body(TransferResponse.failure("An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Endpoint for adding funds to the authenticated user's wallet.
+     *
+     * @param request the deposit request containing the amount to add
+     * @return deposit response with transaction details
+     */
+    @PostMapping("/deposit")
+    public ResponseEntity<DepositResponse> addFunds(@Valid @RequestBody DepositRequest request) {
+        logger.info("Received fund addition request: {}", request);
+
+        try {
+            // Convert the amount to Money domain object
+            Money depositAmount = Money.of(request.getAmount());
+
+            // Process the deposit
+            Transaction transaction = walletService.addFunds(depositAmount);
+
+            // Get the updated balance after deposit
+            Money newBalance = walletService.getBalance();
+
+            logger.info("Fund addition completed successfully. Transaction ID: {}", transaction.getId());
+
+            // Return success response with transaction details
+            return ResponseEntity.ok(DepositResponse.success(
+                    transaction.getId(),
+                    transaction.getAmount(),
+                    newBalance));
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Deposit failed - invalid request: {}", e.getMessage());
+            return ResponseEntity.status(400)
+                    .body(DepositResponse.failure(e.getMessage()));
+
+        } catch (UserNotFoundException e) {
+            logger.warn("Deposit failed - user not found: {}", e.getMessage());
+            return ResponseEntity.status(404)
+                    .body(DepositResponse.failure("User not found"));
+
+        } catch (AccessDeniedException e) {
+            logger.warn("Unauthorized deposit attempt: {}", e.getMessage());
+            return ResponseEntity.status(403)
+                    .body(DepositResponse.failure("Access denied"));
+
+        } catch (Exception e) {
+            logger.error("Unexpected error during fund addition", e);
+            return ResponseEntity.internalServerError()
+                    .body(DepositResponse.failure("An unexpected error occurred"));
         }
     }
 }

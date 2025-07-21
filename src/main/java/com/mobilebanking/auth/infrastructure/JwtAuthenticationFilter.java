@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -51,19 +51,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // If we have a userId and no authentication is set up yet
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-                
+
                 // Validate the token against our userDetails
                 if (jwtTokenService.validateToken(jwt, userDetails)) {
                     // Create authentication token
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
-                    
+                            userDetails.getAuthorities());
+
                     // Set details from the current request
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    
+
                     // Update the security context with our authentication
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }

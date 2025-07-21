@@ -147,6 +147,49 @@ public class WalletService {
     }
 
     /**
+     * Adds funds to the authenticated user's wallet.
+     * This operation creates a deposit transaction and updates the user's balance.
+     *
+     * @param amount the amount to deposit
+     * @return the transaction record of the completed deposit
+     * @throws IllegalArgumentException if the amount is invalid
+     * @throws UserNotFoundException    if the user is not found
+     * @throws AccessDeniedException    if the user is not authenticated
+     */
+    @Transactional
+    public Transaction addFunds(Money amount) {
+        logger.info("Processing fund addition request, amount: {}", amount);
+
+        // Validate the amount
+        if (amount == null || amount.isZero()) {
+            logger.error("Invalid deposit amount: {}", amount);
+            throw new IllegalArgumentException("Deposit amount must be positive");
+        }
+
+        // Get the authenticated user
+        UserId userId = getCurrentUserId();
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    logger.error("User not found: {}", userId);
+                    return new UserNotFoundException(userId);
+                });
+
+        // Create the deposit transaction record
+        Transaction transaction = Transaction.createDeposit(user.getId(), amount);
+
+        // Update user balance
+        user.creditBalance(amount);
+
+        // Save all changes
+        userRepository.save(user);
+        transactionRepository.save(transaction);
+
+        logger.info("Fund addition completed successfully. Transaction ID: {}, New balance: {}",
+                transaction.getId(), user.getBalance());
+        return transaction;
+    }
+
+    /**
      * Gets the current authenticated user's ID.
      *
      * @return the current user's ID
