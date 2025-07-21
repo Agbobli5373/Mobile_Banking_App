@@ -69,7 +69,7 @@
   - Write integration tests for login API endpoint
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [-] 9. Build wallet application service and balance API
+- [x] 9. Build wallet application service and balance API
 
   - Create WalletService application service
   - Implement balance retrieval with user authentication
@@ -78,7 +78,7 @@
   - Write integration tests for balance API with authentication
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 10. Implement money transfer functionality and API
+- [-] 10. Implement money transfer functionality and API
 
   - Extend WalletService with money transfer operations
   - Implement atomic transfer logic using @Transactional annotation
