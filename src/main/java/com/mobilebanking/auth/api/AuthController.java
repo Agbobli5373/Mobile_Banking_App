@@ -1,5 +1,9 @@
 package com.mobilebanking.auth.api;
 
+import com.mobilebanking.auth.api.dto.LoginRequest;
+import com.mobilebanking.auth.api.dto.LoginResponse;
+import com.mobilebanking.auth.application.LoginService;
+import com.mobilebanking.auth.domain.exception.InvalidCredentialsException;
 import com.mobilebanking.shared.domain.exception.DuplicatePhoneNumberException;
 import com.mobilebanking.shared.domain.exception.InvalidPhoneNumberException;
 import com.mobilebanking.shared.domain.exception.InvalidPinException;
@@ -30,9 +34,11 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final UserRegistrationService userRegistrationService;
+    private final LoginService loginService;
 
-    public AuthController(UserRegistrationService userRegistrationService) {
+    public AuthController(UserRegistrationService userRegistrationService, LoginService loginService) {
         this.userRegistrationService = userRegistrationService;
+        this.loginService = loginService;
     }
 
     /**
@@ -72,6 +78,32 @@ public class AuthController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(UserRegistrationResponse.failure("An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Endpoint for user login.
+     *
+     * @param request the login request
+     * @return login response with JWT token
+     */
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        logger.info("Received login request for phone number: {}", request.getPhoneNumber());
+
+        try {
+            String token = loginService.login(request.getPhoneNumber(), request.getPin());
+            return ResponseEntity.ok(LoginResponse.success(token));
+        } catch (InvalidCredentialsException e) {
+            logger.warn("Login failed: {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(LoginResponse.failure("Invalid phone number or PIN"));
+        } catch (Exception e) {
+            logger.error("Unexpected error during login", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(LoginResponse.failure("An unexpected error occurred"));
         }
     }
 

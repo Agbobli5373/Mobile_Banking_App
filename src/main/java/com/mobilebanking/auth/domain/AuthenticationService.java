@@ -1,12 +1,13 @@
 package com.mobilebanking.auth.domain;
 
-import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.user.domain.User;
+import org.springframework.stereotype.Service;
 
 /**
  * Domain service for handling authentication logic.
  * Responsible for validating user credentials.
  */
+@Service
 public class AuthenticationService {
 
     /**

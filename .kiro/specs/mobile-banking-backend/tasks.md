@@ -60,7 +60,7 @@
   - Write integration tests for registration API endpoint
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 8. Implement authentication application service and login API
+- [x] 8. Implement authentication application service and login API
 
   - Create LoginService application service
   - Implement login workflow with credential validation and token generation
@@ -69,7 +69,7 @@
   - Write integration tests for login API endpoint
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 9. Build wallet application service and balance API
+- [-] 9. Build wallet application service and balance API
 
   - Create WalletService application service
   - Implement balance retrieval with user authentication
