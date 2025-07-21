@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: mobile-banking-backend
+
+  # Database configuration
+  datasource:
+    url: jdbc:h2:mem:mobilebanking
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  # JPA configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # H2 Console (for development)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# JWT configuration
+jwt:
+  secret: mySecretKey123456789012345678901234567890
+  expiration: 86400000 # 24 hours in milliseconds
+
+# Logging configuration
+logging:
+  level:
+    com.mobilebanking: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api

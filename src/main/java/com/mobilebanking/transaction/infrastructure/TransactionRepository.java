@@ -1,0 +1,6 @@
+package com.mobilebanking.transaction.infrastructure;
+
+// Transaction repository placeholder - will be implemented in later tasks
+public interface TransactionRepository {
+    // Repository interface implementation will be added in task 5
+}
