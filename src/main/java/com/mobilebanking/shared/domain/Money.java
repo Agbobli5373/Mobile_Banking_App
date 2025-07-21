@@ -1,6 +1,7 @@
 package com.mobilebanking.shared.domain;
 
 import com.mobilebanking.shared.domain.exception.InvalidMoneyException;
+import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -10,9 +11,15 @@ import java.util.Objects;
  * validation.
  * Uses BigDecimal internally to avoid floating-point precision issues.
  */
+@Embeddable
 public final class Money {
     private static final int SCALE = 2; // Two decimal places for currency
     private final BigDecimal amount;
+
+    // JPA requires default constructor
+    public Money() {
+        this.amount = BigDecimal.ZERO.setScale(SCALE, RoundingMode.HALF_UP);
+    }
 
     private Money(BigDecimal amount) {
         this.amount = amount.setScale(SCALE, RoundingMode.HALF_UP);

@@ -1,6 +1,7 @@
 package com.mobilebanking.shared.domain;
 
 import com.mobilebanking.shared.domain.exception.InvalidPhoneNumberException;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -8,12 +9,18 @@ import java.util.regex.Pattern;
  * PhoneNumber value object that handles phone number validation and formatting.
  * Ensures phone numbers meet the required format and business rules.
  */
+@Embeddable
 public final class PhoneNumber {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9]\\d{1,14}$");
     private static final int MIN_LENGTH = 7;
     private static final int MAX_LENGTH = 15;
 
     private final String value;
+
+    // JPA requires default constructor
+    public PhoneNumber() {
+        this.value = "";
+    }
 
     private PhoneNumber(String value) {
         this.value = value;

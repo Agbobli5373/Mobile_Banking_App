@@ -165,9 +165,9 @@ class TransactionIdTest {
             TransactionId transactionId = TransactionId.generate();
 
             // When & Then
-            assertNotEquals(transactionId, null);
-            assertNotEquals(transactionId, "some-string");
-            assertNotEquals(transactionId, UUID.randomUUID());
+            assertNotEquals(null, transactionId);
+            assertNotEquals("some-string", transactionId.asString());
+            assertNotEquals(transactionId.asString(), UUID.randomUUID().toString());
         }
 
         @Test

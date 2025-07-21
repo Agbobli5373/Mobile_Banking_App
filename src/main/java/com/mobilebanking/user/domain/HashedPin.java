@@ -1,6 +1,7 @@
 package com.mobilebanking.user.domain;
 
 import com.mobilebanking.shared.domain.exception.InvalidPinException;
+import jakarta.persistence.Embeddable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Objects;
 
@@ -8,12 +9,18 @@ import java.util.Objects;
  * HashedPin value object that handles PIN hashing and validation using BCrypt.
  * Ensures PINs are securely stored and validated.
  */
+@Embeddable
 public final class HashedPin {
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private static final int MIN_PIN_LENGTH = 4;
     private static final int MAX_PIN_LENGTH = 6;
 
     private final String hashedValue;
+
+    // JPA requires default constructor
+    protected HashedPin() {
+        this.hashedValue = "";
+    }
 
     private HashedPin(String hashedValue) {
         this.hashedValue = hashedValue;

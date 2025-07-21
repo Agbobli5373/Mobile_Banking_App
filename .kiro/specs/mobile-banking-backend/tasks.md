@@ -24,7 +24,7 @@
   - Write unit tests for User aggregate behavior
   - _Requirements: 1.1, 1.3, 4.1, 4.7, 6.1, 7.1_
 
-- [ ] 4. Create Transaction domain aggregate and domain services
+- [x] 4. Create Transaction domain aggregate and domain services
 
   - Implement Transaction entity as aggregate root
   - Create TransactionType enum and TransactionTimestamp value object

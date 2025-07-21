@@ -1,17 +1,24 @@
 package com.mobilebanking.user.domain;
 
 import com.mobilebanking.shared.domain.exception.InvalidUserNameException;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 /**
  * UserName value object that handles user name validation and formatting.
  * Ensures user names meet business requirements and validation rules.
  */
+@Embeddable
 public final class UserName {
     private static final int MIN_LENGTH = 2;
     private static final int MAX_LENGTH = 50;
 
     private final String value;
+
+    // JPA requires default constructor
+    protected UserName() {
+        this.value = "";
+    }
 
     private UserName(String value) {
         this.value = value;
