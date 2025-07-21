@@ -18,7 +18,7 @@ public final class HashedPin {
     private final String hashedValue;
 
     // JPA requires default constructor
-    protected HashedPin() {
+    public HashedPin() {
         this.hashedValue = "";
     }
 

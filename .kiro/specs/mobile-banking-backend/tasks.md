@@ -42,7 +42,7 @@
   - Write repository integration tests using @DataJpaTest
   - _Requirements: 1.2, 4.5, 5.1, 5.3_
 
-- [ ] 6. Build authentication domain service and JWT infrastructure
+- [x] 6. Build authentication domain service and JWT infrastructure
 
   - Create AuthenticationService domain service for credential validation
   - Implement JwtTokenService for token generation and validation
@@ -51,7 +51,7 @@
   - Write unit tests for authentication services and integration tests for security config
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.3, 7.4_
 
-- [ ] 7. Implement user registration application service and API
+- [x] 7. Implement user registration application service and API
 
   - Create UserRegistrationService application service
   - Implement registration workflow with validation and duplicate checking
