@@ -1,6 +1,9 @@
 spring:
   application:
     name: mobile-banking-backend
+  threads:
+    virtual:
+      enabled: true
 
   # Database configuration
   datasource:
@@ -52,5 +55,4 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-  # springdoc.swagger-ui.path=/swagger-ui.html
-  #springdoc.api-docs.path=/api-docs
+

@@ -66,6 +66,16 @@ public interface UserRepository extends JpaRepository<User, String> {
     }
 
     /**
+     * Checks if a user exists with the given user ID.
+     * 
+     * @param userId the user ID to check
+     * @return true if a user exists with this ID, false otherwise
+     */
+    default boolean existsByUserId(UserId userId) {
+        return existsById(userId.asString());
+    }
+
+    /**
      * Deletes a user by their unique identifier.
      * 
      * @param userId the user ID to delete

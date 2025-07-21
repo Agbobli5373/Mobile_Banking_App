@@ -6,21 +6,28 @@ import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
 import com.mobilebanking.transaction.api.dto.DepositRequest;
 import com.mobilebanking.transaction.api.dto.DepositResponse;
+import com.mobilebanking.transaction.api.dto.TransactionHistoryResponse;
 import com.mobilebanking.transaction.api.dto.TransferRequest;
 import com.mobilebanking.transaction.api.dto.TransferResponse;
+import com.mobilebanking.transaction.application.TransactionQueryService;
 import com.mobilebanking.transaction.application.WalletService;
 import com.mobilebanking.transaction.domain.Transaction;
+import com.mobilebanking.shared.domain.UserId;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * REST controller for wallet-related endpoints.
@@ -33,9 +40,11 @@ public class WalletController {
 
     private static final Logger logger = LoggerFactory.getLogger(WalletController.class);
     private final WalletService walletService;
+    private final TransactionQueryService transactionQueryService;
 
-    public WalletController(WalletService walletService) {
+    public WalletController(WalletService walletService, TransactionQueryService transactionQueryService) {
         this.walletService = walletService;
+        this.transactionQueryService = transactionQueryService;
     }
 
     /**
@@ -170,5 +179,62 @@ public class WalletController {
             return ResponseEntity.internalServerError()
                     .body(DepositResponse.failure("An unexpected error occurred"));
         }
+    }
+
+    /**
+     * Endpoint for retrieving the authenticated user's transaction history.
+     * Returns all transactions where the user is either sender or receiver,
+     * ordered by timestamp in descending order (most recent first).
+     *
+     * @return transaction history response with list of transactions
+     */
+    @GetMapping("/transactions")
+    public ResponseEntity<TransactionHistoryResponse> getTransactionHistory() {
+        logger.info("Received transaction history request for authenticated user");
+
+        try {
+            // Get current user ID for transaction direction determination
+            UserId currentUserId = getCurrentUserId();
+
+            // Retrieve transaction history
+            List<Transaction> transactions = transactionQueryService.getTransactionHistory();
+
+            logger.info("Transaction history retrieved successfully. Found {} transactions", transactions.size());
+
+            // Return success response with transaction details
+            return ResponseEntity.ok(TransactionHistoryResponse.success(transactions, currentUserId));
+
+        } catch (UserNotFoundException e) {
+            logger.warn("Transaction history retrieval failed - user not found: {}", e.getMessage());
+            return ResponseEntity.status(404)
+                    .body(TransactionHistoryResponse.failure("User not found"));
+
+        } catch (AccessDeniedException e) {
+            logger.warn("Unauthorized transaction history access attempt: {}", e.getMessage());
+            return ResponseEntity.status(403)
+                    .body(TransactionHistoryResponse.failure("Access denied"));
+
+        } catch (Exception e) {
+            logger.error("Unexpected error during transaction history retrieval", e);
+            return ResponseEntity.internalServerError()
+                    .body(TransactionHistoryResponse.failure("An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Gets the current authenticated user's ID.
+     *
+     * @return the current user's ID
+     * @throws AccessDeniedException if no user is authenticated
+     */
+    private UserId getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+            logger.error("No authenticated user found");
+            throw new AccessDeniedException("User not authenticated");
+        }
+
+        return UserId.fromString(authentication.getName());
     }
 }
