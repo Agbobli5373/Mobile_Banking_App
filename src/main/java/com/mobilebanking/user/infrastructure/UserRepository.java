@@ -3,7 +3,9 @@ package com.mobilebanking.user.infrastructure;
 import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.user.domain.User;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -82,5 +84,26 @@ public interface UserRepository extends JpaRepository<User, String> {
      */
     default void deleteByUserId(UserId userId) {
         deleteById(userId.asString());
+    }
+
+    /**
+     * Finds a user by their unique identifier with a pessimistic write lock.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :userId")
+    Optional<User> findByUserIdForUpdate(@Param("userId") String userId);
+
+    /**
+     * Finds a user by their phone number with a pessimistic write lock.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.phone.value = :phoneNumber")
+    Optional<User> findByPhoneForUpdate(@Param("phoneNumber") String phoneNumber);
+
+    /**
+     * Convenience method for domain object.
+     */
+    default Optional<User> findByPhoneForUpdate(PhoneNumber phone) {
+        return findByPhoneForUpdate(phone.getValue());
     }
 }

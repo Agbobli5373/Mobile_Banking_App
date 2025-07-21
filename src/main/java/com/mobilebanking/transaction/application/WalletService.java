@@ -107,17 +107,17 @@ public class WalletService {
     public Transaction transferMoney(String recipientPhone, Money amount) {
         logger.info("Processing money transfer request to phone: {}, amount: {}", recipientPhone, amount);
 
-        // Get the authenticated user (sender)
+        // Get the authenticated user (sender) with pessimistic lock
         UserId senderId = getCurrentUserId();
-        User sender = userRepository.findByUserId(senderId)
+        User sender = userRepository.findByUserIdForUpdate(senderId.asString())
                 .orElseThrow(() -> {
                     logger.error("Sender not found: {}", senderId);
                     return new UserNotFoundException(senderId);
                 });
 
-        // Find the recipient by phone number
+        // Find the recipient by phone number with pessimistic lock
         PhoneNumber recipientPhoneObj = PhoneNumber.of(recipientPhone);
-        User recipient = userRepository.findByPhone(recipientPhoneObj)
+        User recipient = userRepository.findByPhoneForUpdate(recipientPhoneObj)
                 .orElseThrow(() -> {
                     logger.error("Recipient not found with phone: {}", recipientPhone);
                     return new UserNotFoundException("User with phone " + recipientPhone + " not found");
