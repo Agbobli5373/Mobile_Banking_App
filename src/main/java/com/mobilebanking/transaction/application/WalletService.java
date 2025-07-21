@@ -1,8 +1,13 @@
 package com.mobilebanking.transaction.application;
 
 import com.mobilebanking.shared.domain.Money;
+import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.shared.domain.UserId;
+import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
 import com.mobilebanking.shared.domain.exception.UserNotFoundException;
+import com.mobilebanking.transaction.domain.MoneyTransferService;
+import com.mobilebanking.transaction.domain.Transaction;
+import com.mobilebanking.transaction.infrastructure.TransactionRepository;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.infrastructure.UserRepository;
 import org.slf4j.Logger;
@@ -22,9 +27,15 @@ public class WalletService {
 
     private static final Logger logger = LoggerFactory.getLogger(WalletService.class);
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
+    private final MoneyTransferService moneyTransferService;
 
-    public WalletService(UserRepository userRepository) {
+    public WalletService(UserRepository userRepository,
+            TransactionRepository transactionRepository,
+            MoneyTransferService moneyTransferService) {
         this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
+        this.moneyTransferService = moneyTransferService;
     }
 
     /**
@@ -80,13 +91,69 @@ public class WalletService {
     }
 
     /**
+     * Transfers money from the authenticated user to another user identified by
+     * phone number.
+     * This operation is atomic - either both accounts are updated or none are.
+     *
+     * @param recipientPhone the phone number of the recipient
+     * @param amount         the amount to transfer
+     * @return the transaction ID of the completed transfer
+     * @throws UserNotFoundException      if the recipient is not found
+     * @throws InsufficientFundsException if the sender has insufficient funds
+     * @throws IllegalArgumentException   if the transfer request is invalid
+     * @throws AccessDeniedException      if the user is not authenticated
+     */
+    @Transactional
+    public Transaction transferMoney(String recipientPhone, Money amount) {
+        logger.info("Processing money transfer request to phone: {}, amount: {}", recipientPhone, amount);
+
+        // Get the authenticated user (sender)
+        UserId senderId = getCurrentUserId();
+        User sender = userRepository.findByUserId(senderId)
+                .orElseThrow(() -> {
+                    logger.error("Sender not found: {}", senderId);
+                    return new UserNotFoundException(senderId);
+                });
+
+        // Find the recipient by phone number
+        PhoneNumber recipientPhoneObj = PhoneNumber.of(recipientPhone);
+        User recipient = userRepository.findByPhone(recipientPhoneObj)
+                .orElseThrow(() -> {
+                    logger.error("Recipient not found with phone: {}", recipientPhone);
+                    return new UserNotFoundException("User with phone " + recipientPhone + " not found");
+                });
+
+        // Validate the transfer (will throw exceptions if invalid)
+        moneyTransferService.validateTransferRequest(
+                sender.getId(),
+                recipient.getId(),
+                amount,
+                sender.getBalance());
+
+        // Create the transaction record
+        Transaction transaction = Transaction.createTransfer(sender.getId(), recipient.getId(), amount);
+
+        // Update balances atomically
+        sender.debitBalance(amount);
+        recipient.creditBalance(amount);
+
+        // Save all changes
+        userRepository.save(sender);
+        userRepository.save(recipient);
+        transactionRepository.save(transaction);
+
+        logger.info("Money transfer completed successfully. Transaction ID: {}", transaction.getId());
+        return transaction;
+    }
+
+    /**
      * Gets the current authenticated user's ID.
      *
      * @return the current user's ID
      * @throws AccessDeniedException if no user is authenticated
      */
-    private UserId getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    protected UserId getCurrentUserId() {
+        Authentication authentication = getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getName().equals("anonymousUser")) {
             logger.error("No authenticated user found");
@@ -94,5 +161,15 @@ public class WalletService {
         }
 
         return UserId.fromString(authentication.getName());
+    }
+
+    /**
+     * Gets the current authentication from SecurityContext.
+     * This method is protected to allow for easier testing.
+     *
+     * @return the current authentication
+     */
+    protected Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }

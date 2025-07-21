@@ -1,14 +1,22 @@
 package com.mobilebanking.transaction.api;
 
 import com.mobilebanking.shared.domain.Money;
+import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
 import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
+import com.mobilebanking.transaction.api.dto.TransferRequest;
+import com.mobilebanking.transaction.api.dto.TransferResponse;
 import com.mobilebanking.transaction.application.WalletService;
+import com.mobilebanking.transaction.domain.Transaction;
+import com.mobilebanking.user.domain.User;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,6 +58,64 @@ public class WalletController {
             logger.error("Unexpected error during balance retrieval", e);
             return ResponseEntity.internalServerError()
                     .body(BalanceResponse.failure("An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Endpoint for transferring money to another user.
+     *
+     * @param request the transfer request containing recipient phone and amount
+     * @return transfer response with transaction details
+     */
+    @PostMapping("/send")
+    public ResponseEntity<TransferResponse> transferMoney(@Valid @RequestBody TransferRequest request) {
+        logger.info("Received money transfer request: {}", request);
+
+        try {
+            // Convert the amount to Money domain object
+            Money transferAmount = Money.of(request.getAmount());
+
+            // Process the transfer
+            Transaction transaction = walletService.transferMoney(
+                    request.getRecipientPhone(),
+                    transferAmount);
+
+            // Get the updated balance after transfer
+            Money newBalance = walletService.getBalance();
+
+            logger.info("Money transfer completed successfully. Transaction ID: {}", transaction.getId());
+
+            // Return success response with transaction details
+            return ResponseEntity.ok(TransferResponse.success(
+                    transaction.getId(),
+                    transaction.getAmount(),
+                    request.getRecipientPhone(),
+                    newBalance));
+
+        } catch (UserNotFoundException e) {
+            logger.warn("Transfer failed - recipient not found: {}", e.getMessage());
+            return ResponseEntity.status(404)
+                    .body(TransferResponse.failure("Recipient not found: " + request.getRecipientPhone()));
+
+        } catch (InsufficientFundsException e) {
+            logger.warn("Transfer failed - insufficient funds: {}", e.getMessage());
+            return ResponseEntity.status(400)
+                    .body(TransferResponse.failure("Insufficient funds for this transfer"));
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Transfer failed - invalid request: {}", e.getMessage());
+            return ResponseEntity.status(400)
+                    .body(TransferResponse.failure(e.getMessage()));
+
+        } catch (AccessDeniedException e) {
+            logger.warn("Unauthorized transfer attempt: {}", e.getMessage());
+            return ResponseEntity.status(403)
+                    .body(TransferResponse.failure("Access denied"));
+
+        } catch (Exception e) {
+            logger.error("Unexpected error during money transfer", e);
+            return ResponseEntity.internalServerError()
+                    .body(TransferResponse.failure("An unexpected error occurred"));
         }
     }
 }

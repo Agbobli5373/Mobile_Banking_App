@@ -3,12 +3,14 @@ package com.mobilebanking.transaction.domain;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
+import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 /**
  * MoneyTransferService domain service that encapsulates the business logic
  * for money transfers between users, including validation and business rules.
  */
+@Service
 public class MoneyTransferService {
 
     /**

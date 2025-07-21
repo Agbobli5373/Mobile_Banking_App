@@ -78,7 +78,7 @@
   - Write integration tests for balance API with authentication
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [-] 10. Implement money transfer functionality and API
+- [x] 10. Implement money transfer functionality and API
 
   - Extend WalletService with money transfer operations
   - Implement atomic transfer logic using @Transactional annotation
