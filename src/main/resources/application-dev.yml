@@ -1,0 +1,36 @@
+spring:
+  # Database configuration for development
+  datasource:
+    url: jdbc:h2:file:./data/mobilebanking;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: dev_password_only
+
+  # JPA configuration for development
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # H2 Console configuration
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: false
+
+  # Flyway configuration for development
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    clean-on-validation-error: false
+
+# Logging configuration for development
+logging:
+  level:
+    com.mobilebanking: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb: DEBUG

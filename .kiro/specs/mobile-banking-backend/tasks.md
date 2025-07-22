@@ -114,7 +114,7 @@
   - Write tests for error handling scenarios
   - _Requirements: 1.5, 2.5, 3.2, 4.2, 4.5, 4.7, 6.2, 6.4_
 
-- [ ] 14. Configure database schema and migrations
+- [x] 14. Configure database schema and migrations
 
   - Create database schema scripts for users and transactions tables
   - Configure JPA entity mappings with proper constraints

@@ -20,7 +20,7 @@ public final class UserName {
         this.value = "";
     }
 
-    private UserName(String value) {
+    public UserName(String value) {
         this.value = value;
     }
 

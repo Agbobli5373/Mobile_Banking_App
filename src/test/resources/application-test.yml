@@ -1,0 +1,38 @@
+spring:
+  # Database configuration for testing
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+
+  # JPA configuration for testing
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Flyway configuration for testing
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    clean-on-validation-error: true
+    clean-disabled: false
+
+  # Disable H2 console in tests
+  h2:
+    console:
+      enabled: false
+
+# Logging configuration for testing
+logging:
+  level:
+    root: WARN
+    com.mobilebanking: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.flywaydb: DEBUG

@@ -13,17 +13,22 @@ import java.util.Objects;
  * consistency.
  */
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = {
+        @Index(name = "idx_transactions_sender", columnList = "sender_id"),
+        @Index(name = "idx_transactions_receiver", columnList = "receiver_id"),
+        @Index(name = "idx_transactions_timestamp", columnList = "timestamp"),
+        @Index(name = "idx_transactions_user_time", columnList = "sender_id, receiver_id, timestamp DESC")
+})
 public class Transaction {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", length = 36, nullable = false, updatable = false)
     private String id; // Store UUID as string for JPA
 
-    @Column(name = "sender_id")
+    @Column(name = "sender_id", length = 36)
     private String senderId; // Can be null for deposits
 
-    @Column(name = "receiver_id", nullable = false)
+    @Column(name = "receiver_id", length = 36, nullable = false)
     private String receiverId;
 
     @Embedded
@@ -35,7 +40,7 @@ public class Transaction {
     private TransactionTimestamp timestamp;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_type", nullable = false)
+    @Column(name = "transaction_type", length = 20, nullable = false)
     private TransactionType type;
 
     // JPA requires default constructor

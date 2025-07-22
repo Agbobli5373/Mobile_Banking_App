@@ -13,33 +13,35 @@ import java.util.Objects;
  * Contains core user information and wallet functionality.
  */
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_phone", columnList = "phone")
+})
 public class User {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", length = 36, nullable = false, updatable = false)
     private String id; // Store UUID as string for JPA
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "name"))
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private UserName name;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "phone", unique = true))
+    @AttributeOverride(name = "value", column = @Column(name = "phone", nullable = false, unique = true))
     private PhoneNumber phone;
 
     @Embedded
-    @AttributeOverride(name = "hashedValue", column = @Column(name = "pin_hash"))
+    @AttributeOverride(name = "hashedValue", column = @Column(name = "pin_hash", nullable = false))
     private HashedPin pin;
 
     @Embedded
-    @AttributeOverride(name = "amount", column = @Column(name = "balance", precision = 19, scale = 2))
+    @AttributeOverride(name = "amount", column = @Column(name = "balance", precision = 19, scale = 2, nullable = false))
     private Money balance;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     // JPA requires default constructor

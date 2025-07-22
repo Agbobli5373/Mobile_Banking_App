@@ -22,7 +22,7 @@ public final class PhoneNumber {
         this.value = "";
     }
 
-    private PhoneNumber(String value) {
+    public PhoneNumber(String value) {
         this.value = value;
     }
 
