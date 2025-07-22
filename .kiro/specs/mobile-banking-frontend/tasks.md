@@ -9,7 +9,7 @@
   - Create basic package.json scripts for development, build, and testing
   - _Requirements: 9.1, 9.2, 9.4_
 
-- [-] 2. Create core UI component library with TailwindCSS
+- [ ] 2. Create core UI component library with TailwindCSS
 
   - Implement Button component with variants (primary, secondary, outline, ghost, danger) and loading states
   - Create Input component with validation styling, labels, and error message display
@@ -19,7 +19,7 @@
   - Write unit tests for all core UI components
   - _Requirements: 8.1, 8.4, 7.1, 7.2_
 
-- [ ] 3. Implement layout components and responsive navigation
+- [x] 3. Implement layout components and responsive navigation
 
   - Create AppLayout component with responsive header, sidebar, and main content areas
   - Build AuthLayout component for centered authentication forms with banking branding
@@ -29,7 +29,7 @@
   - Test responsive behavior across mobile, tablet, and desktop breakpoints
   - _Requirements: 7.1, 7.2, 8.2_
 
-- [ ] 4. Set up API service layer and HTTP client configuration
+- [-] 4. Set up API service layer and HTTP client configuration
 
   - Configure Axios with base URL, request/response interceptors, and timeout settings
   - Create authService with login, register, and token refresh methods
