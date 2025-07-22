@@ -45,8 +45,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String MSG_UNEXPECTED_ERROR = "An unexpected error occurred";
     private static final String MSG_AUTHENTICATION_FAILED = "Authentication failed";
     private static final String MSG_INVALID_CREDENTIALS = "Invalid phone number or PIN";
-    private static final String MSG_USER_NOT_FOUND = "User not found";
-    private static final String MSG_VALIDATION_ERROR = "Validation Error";
     private static final String MSG_CONSTRAINT_VALIDATION = "Constraint validation failed";
 
     /**

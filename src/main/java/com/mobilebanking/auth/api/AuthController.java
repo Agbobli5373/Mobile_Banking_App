@@ -3,11 +3,6 @@ package com.mobilebanking.auth.api;
 import com.mobilebanking.auth.api.dto.LoginRequest;
 import com.mobilebanking.auth.api.dto.LoginResponse;
 import com.mobilebanking.auth.application.LoginService;
-import com.mobilebanking.auth.domain.exception.InvalidCredentialsException;
-import com.mobilebanking.shared.domain.exception.DuplicatePhoneNumberException;
-import com.mobilebanking.shared.domain.exception.InvalidPhoneNumberException;
-import com.mobilebanking.shared.domain.exception.InvalidPinException;
-import com.mobilebanking.shared.domain.exception.InvalidUserNameException;
 import com.mobilebanking.user.api.dto.UserRegistrationRequest;
 import com.mobilebanking.user.api.dto.UserRegistrationResponse;
 import com.mobilebanking.user.application.UserRegistrationService;
@@ -17,12 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 /**
  * REST controller for authentication-related endpoints.

@@ -1,8 +1,6 @@
 package com.mobilebanking.transaction.api;
 
 import com.mobilebanking.shared.domain.Money;
-import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
-import com.mobilebanking.shared.domain.exception.SelfTransferException;
 import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
 import com.mobilebanking.transaction.api.dto.DepositRequest;
