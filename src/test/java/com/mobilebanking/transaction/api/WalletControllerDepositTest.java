@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class WalletControllerDepositTest {
+class WalletControllerDepositTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,7 +44,7 @@ public class WalletControllerDepositTest {
     private String jwtToken;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Create a test user
         testUser = User.create(
                 UserName.of("Test User"),
@@ -63,7 +63,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withValidRequest_returnsSuccess() throws Exception {
+     void addFunds_withValidRequest_returnsSuccess() throws Exception {
         // Given: A valid deposit request
         DepositRequest request = new DepositRequest(50.0);
 
@@ -94,7 +94,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withZeroAmount_returnsBadRequest() throws Exception {
+    void addFunds_withZeroAmount_returnsBadRequest() throws Exception {
         // Given: A deposit request with zero amount
         DepositRequest request = new DepositRequest(0.0);
 
@@ -111,7 +111,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withNegativeAmount_returnsBadRequest() throws Exception {
+     void addFunds_withNegativeAmount_returnsBadRequest() throws Exception {
         // Given: A deposit request with negative amount
         DepositRequest request = new DepositRequest(-50.0);
 
@@ -128,7 +128,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withoutToken_returnsUnauthorized() throws Exception {
+     void addFunds_withoutToken_returnsUnauthorized() throws Exception {
         // Given: A valid deposit request
         DepositRequest request = new DepositRequest(50.0);
 
@@ -140,7 +140,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withInvalidToken_returnsUnauthorized() throws Exception {
+    void addFunds_withInvalidToken_returnsUnauthorized() throws Exception {
         // Given: A valid deposit request
         DepositRequest request = new DepositRequest(50.0);
 
@@ -153,7 +153,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withLargeAmount_returnsSuccess() throws Exception {
+    void addFunds_withLargeAmount_returnsSuccess() throws Exception {
         // Given: A deposit request with large amount
         DepositRequest request = new DepositRequest(10000.0);
 
@@ -180,7 +180,7 @@ public class WalletControllerDepositTest {
     }
 
     @Test
-    public void addFunds_withDecimalAmount_returnsSuccess() throws Exception {
+    void addFunds_withDecimalAmount_returnsSuccess() throws Exception {
         // Given: A deposit request with decimal amount
         DepositRequest request = new DepositRequest(25.75);
 

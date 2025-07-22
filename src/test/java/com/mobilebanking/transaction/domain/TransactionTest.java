@@ -1,7 +1,6 @@
 package com.mobilebanking.transaction.domain;
 
 import com.mobilebanking.shared.domain.Money;
-import com.mobilebanking.shared.domain.TransactionId;
 import com.mobilebanking.shared.domain.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

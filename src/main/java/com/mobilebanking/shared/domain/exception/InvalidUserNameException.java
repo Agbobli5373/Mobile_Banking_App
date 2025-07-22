@@ -5,7 +5,7 @@ package com.mobilebanking.shared.domain.exception;
  */
 public class InvalidUserNameException extends DomainException {
 
-    private InvalidUserNameException(String message) {
+    public InvalidUserNameException(String message) {
         super("INVALID_USER_NAME", message);
     }
 

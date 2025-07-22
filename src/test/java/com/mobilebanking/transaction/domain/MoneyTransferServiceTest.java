@@ -3,6 +3,7 @@ package com.mobilebanking.transaction.domain;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
+import com.mobilebanking.shared.domain.exception.SelfTransferException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -101,12 +102,11 @@ class MoneyTransferServiceTest {
     }
 
     @Test
-
-    @DisplayName("Should throw exception when validating transfer to same user")
+    @DisplayName("Should throw SelfTransferException when validating transfer to same user")
     void shouldThrowExceptionWhenValidatingTransferToSameUser() {
         // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        SelfTransferException exception = assertThrows(
+                SelfTransferException.class,
                 () -> moneyTransferService.validateTransferRequest(senderId, senderId, transferAmount,
                         sufficientBalance));
         assertEquals("Cannot transfer money to yourself", exception.getMessage());
@@ -132,14 +132,14 @@ class MoneyTransferServiceTest {
         assertFalse(moneyTransferService.hasSufficientBalance(insufficientBalance, transferAmount));
     }
 
-@Test
+    @Test
     @DisplayName("Should throw exception when checking balance with null parameters")
     void shouldThrowExceptionWhenCheckingBalanceWithNullParameters() {
         // When & Then
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.hasSufficientBalance(null, transferAmount));
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.hasSufficientBalance(sufficientBalance, null));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.hasSufficientBalance(null, transferAmount));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.hasSufficientBalance(sufficientBalance, null));
     }
 
     @Test
@@ -160,9 +160,8 @@ class MoneyTransferServiceTest {
     void shouldThrowExceptionWhenDebitingMoreThanAvailableBalance() {
         // When & Then
         InsufficientFundsException exception = assertThrows(
-            InsufficientFundsException.class,
-            () -> moneyTransferService.calculateBalanceAfterDebit(insufficientBalance, transferAmount)
-        );
+                InsufficientFundsException.class,
+                () -> moneyTransferService.calculateBalanceAfterDebit(insufficientBalance, transferAmount));
         assertTrue(exception.getMessage().contains("Insufficient funds"));
     }
 
@@ -170,10 +169,10 @@ class MoneyTransferServiceTest {
     @DisplayName("Should throw exception when calculating debit with null parameters")
     void shouldThrowExceptionWhenCalculatingDebitWithNullParameters() {
         // When & Then
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.calculateBalanceAfterDebit(null, transferAmount));
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.calculateBalanceAfterDebit(sufficientBalance, null));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.calculateBalanceAfterDebit(null, transferAmount));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.calculateBalanceAfterDebit(sufficientBalance, null));
     }
 
     @Test
@@ -195,10 +194,10 @@ class MoneyTransferServiceTest {
     @DisplayName("Should throw exception when calculating credit with null parameters")
     void shouldThrowExceptionWhenCalculatingCreditWithNullParameters() {
         // When & Then
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.calculateBalanceAfterCredit(null, transferAmount));
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.calculateBalanceAfterCredit(sufficientBalance, null));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.calculateBalanceAfterCredit(null, transferAmount));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.calculateBalanceAfterCredit(sufficientBalance, null));
     }
 
     @Test
@@ -213,7 +212,7 @@ class MoneyTransferServiceTest {
     @DisplayName("Should throw exception when validating transfer amount with null")
     void shouldThrowExceptionWhenValidatingTransferAmountWithNull() {
         // When & Then
-        assertThrows(NullPointerException.class, 
-            () -> moneyTransferService.isValidTransferAmount(null));
+        assertThrows(NullPointerException.class,
+                () -> moneyTransferService.isValidTransferAmount(null));
     }
 }

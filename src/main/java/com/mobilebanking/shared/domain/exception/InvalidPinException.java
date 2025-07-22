@@ -5,7 +5,7 @@ package com.mobilebanking.shared.domain.exception;
  */
 public class InvalidPinException extends DomainException {
 
-    private InvalidPinException(String message) {
+    public InvalidPinException(String message) {
         super("INVALID_PIN", message);
     }
 

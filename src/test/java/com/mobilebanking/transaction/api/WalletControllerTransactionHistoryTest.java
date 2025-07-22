@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mobilebanking.auth.domain.JwtTokenService;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.PhoneNumber;
-import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.transaction.api.dto.TransactionHistoryResponse;
 import com.mobilebanking.transaction.domain.Transaction;
 import com.mobilebanking.transaction.infrastructure.TransactionRepository;
@@ -28,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class WalletControllerTransactionHistoryTest {
+class WalletControllerTransactionHistoryTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +49,7 @@ public class WalletControllerTransactionHistoryTest {
     private String senderJwtToken;
 
     @BeforeEach
-    public void setup() {
+     void setup() {
         // Create test users
         sender = User.create(
                 UserName.of("Sender User"),
@@ -84,7 +83,7 @@ public class WalletControllerTransactionHistoryTest {
     }
 
     @Test
-    public void getTransactionHistory_withValidToken_returnsTransactions() throws Exception {
+     void getTransactionHistory_withValidToken_returnsTransactions() throws Exception {
         // When: A request is made with a valid JWT token
         MvcResult result = mockMvc.perform(get("/api/wallet/transactions")
                 .header("Authorization", "Bearer " + senderJwtToken)
@@ -125,7 +124,7 @@ public class WalletControllerTransactionHistoryTest {
     }
 
     @Test
-    public void getTransactionHistoryPaginated_withValidToken_returnsPaginatedTransactions() throws Exception {
+     void getTransactionHistoryPaginated_withValidToken_returnsPaginatedTransactions() throws Exception {
         // Create additional transactions to test pagination
         for (int i = 0; i < 5; i++) {
             Transaction deposit = Transaction.createDeposit(sender.getId(), Money.of(100.0 * (i + 1)));
@@ -182,7 +181,7 @@ public class WalletControllerTransactionHistoryTest {
     }
 
     @Test
-    public void getTransactionHistory_withoutToken_returnsUnauthorized() throws Exception {
+     void getTransactionHistory_withoutToken_returnsUnauthorized() throws Exception {
         // When: A request is made without a JWT token
         mockMvc.perform(get("/api/wallet/transactions")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -190,7 +189,7 @@ public class WalletControllerTransactionHistoryTest {
     }
 
     @Test
-    public void getTransactionHistoryPaginated_withoutToken_returnsUnauthorized() throws Exception {
+     void getTransactionHistoryPaginated_withoutToken_returnsUnauthorized() throws Exception {
         // When: A request is made without a JWT token
         mockMvc.perform(get("/api/wallet/transactions/paged")
                 .contentType(MediaType.APPLICATION_JSON))

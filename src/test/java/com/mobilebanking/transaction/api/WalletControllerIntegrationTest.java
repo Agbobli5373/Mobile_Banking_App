@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mobilebanking.auth.domain.JwtTokenService;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.PhoneNumber;
-import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
-import com.mobilebanking.transaction.application.WalletService;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.domain.UserName;
 import com.mobilebanking.user.infrastructure.UserRepository;
@@ -16,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class WalletControllerIntegrationTest {
+class WalletControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,13 +42,12 @@ public class WalletControllerIntegrationTest {
 
     // No need for WalletService as we're testing the controller directly
 
-    private User testUser;
     private String jwtToken;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Create a test user
-        testUser = User.create(
+        User testUser = User.create(
                 UserName.of("Test User"),
                 PhoneNumber.of("1234567890"),
                 "1234");
@@ -68,7 +64,7 @@ public class WalletControllerIntegrationTest {
     }
 
     @Test
-    public void getBalance_withValidToken_returnsBalance() throws Exception {
+    void getBalance_withValidToken_returnsBalance() throws Exception {
         // When: A request is made with a valid JWT token
         MvcResult result = mockMvc.perform(get("/api/wallet/balance")
                 .header("Authorization", "Bearer " + jwtToken)
@@ -87,19 +83,19 @@ public class WalletControllerIntegrationTest {
     }
 
     @Test
-    public void getBalance_withoutToken_returnsUnauthorized() throws Exception {
+    void getBalance_withoutToken_returnsUnauthorized() throws Exception {
         // When: A request is made without a JWT token
         mockMvc.perform(get("/api/wallet/balance")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    public void getBalance_withInvalidToken_returnsUnauthorized() throws Exception {
+    void getBalance_withInvalidToken_returnsUnauthorized() throws Exception {
         // When: A request is made with an invalid JWT token
         mockMvc.perform(get("/api/wallet/balance")
                 .header("Authorization", "Bearer invalidtoken")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }

@@ -3,6 +3,7 @@ package com.mobilebanking.transaction.domain;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
+import com.mobilebanking.shared.domain.exception.SelfTransferException;
 import org.springframework.stereotype.Service;
 import java.util.Objects;
 
@@ -49,7 +50,7 @@ public class MoneyTransferService {
 
         // Business rule: Cannot transfer to yourself
         if (senderId.equals(receiverId)) {
-            throw new IllegalArgumentException("Cannot transfer money to yourself");
+            throw new SelfTransferException();
         }
 
         // Business rule: Transfer amount must be positive

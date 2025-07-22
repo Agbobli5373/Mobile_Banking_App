@@ -82,8 +82,8 @@ class WalletServiceTransferTest {
     void shouldTransferMoneySuccessfully() {
         // Given
         Money transferAmount = Money.of(100.00);
-        when(userRepository.findByUserId(senderId)).thenReturn(Optional.of(sender));
-        when(userRepository.findByPhone(recipientPhone)).thenReturn(Optional.of(recipient));
+        when(userRepository.findByUserIdForUpdate(senderId.asString())).thenReturn(Optional.of(sender));
+        when(userRepository.findByPhoneForUpdate(recipientPhone)).thenReturn(Optional.of(recipient));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
@@ -111,8 +111,8 @@ class WalletServiceTransferTest {
     void shouldThrowExceptionWhenRecipientNotFound() {
         // Given
         Money transferAmount = Money.of(100.00);
-        when(userRepository.findByUserId(senderId)).thenReturn(Optional.of(sender));
-        when(userRepository.findByPhone(any(PhoneNumber.class))).thenReturn(Optional.empty());
+        when(userRepository.findByUserIdForUpdate(senderId.asString())).thenReturn(Optional.of(sender));
+        when(userRepository.findByPhoneForUpdate(recipientPhone)).thenReturn(Optional.empty());
 
         // When/Then
         UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
@@ -133,8 +133,8 @@ class WalletServiceTransferTest {
     void shouldThrowExceptionWithInsufficientFunds() {
         // Given
         Money transferAmount = Money.of(2000.00);
-        when(userRepository.findByUserId(senderId)).thenReturn(Optional.of(sender));
-        when(userRepository.findByPhone(recipientPhone)).thenReturn(Optional.of(recipient));
+        when(userRepository.findByUserIdForUpdate(senderId.asString())).thenReturn(Optional.of(sender));
+        when(userRepository.findByPhoneForUpdate(recipientPhone)).thenReturn(Optional.of(recipient));
         doThrow(InsufficientFundsException.forTransfer(transferAmount, sender.getBalance()))
                 .when(moneyTransferService).validateTransferRequest(any(), any(), any(), any());
 
@@ -158,8 +158,8 @@ class WalletServiceTransferTest {
         // Given
         Money transferAmount = Money.of(100.00);
         PhoneNumber senderPhone = sender.getPhone();
-        when(userRepository.findByUserId(senderId)).thenReturn(Optional.of(sender));
-        when(userRepository.findByPhone(senderPhone)).thenReturn(Optional.of(sender));
+        when(userRepository.findByUserIdForUpdate(senderId.asString())).thenReturn(Optional.of(sender));
+        when(userRepository.findByPhoneForUpdate(senderPhone)).thenReturn(Optional.of(sender));
         doThrow(new IllegalArgumentException("Cannot transfer money to yourself"))
                 .when(moneyTransferService).validateTransferRequest(any(), any(), any(), any());
 
@@ -181,8 +181,8 @@ class WalletServiceTransferTest {
     void shouldThrowExceptionWithZeroAmount() {
         // Given
         Money transferAmount = Money.zero();
-        when(userRepository.findByUserId(senderId)).thenReturn(Optional.of(sender));
-        when(userRepository.findByPhone(recipientPhone)).thenReturn(Optional.of(recipient));
+        when(userRepository.findByUserIdForUpdate(senderId.asString())).thenReturn(Optional.of(sender));
+        when(userRepository.findByPhoneForUpdate(recipientPhone)).thenReturn(Optional.of(recipient));
         doThrow(new IllegalArgumentException("Transfer amount must be greater than zero"))
                 .when(moneyTransferService).validateTransferRequest(any(), any(), any(), any());
 

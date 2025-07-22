@@ -2,6 +2,7 @@ package com.mobilebanking.transaction.api;
 
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.exception.InsufficientFundsException;
+import com.mobilebanking.shared.domain.exception.SelfTransferException;
 import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.api.dto.BalanceResponse;
 import com.mobilebanking.transaction.api.dto.DepositRequest;
@@ -60,21 +61,9 @@ public class WalletController {
     public ResponseEntity<BalanceResponse> getBalance() {
         logger.info("Received balance request for authenticated user");
 
-        try {
-            Money balance = walletService.getBalance();
-            logger.info("Balance retrieved successfully");
-            return ResponseEntity.ok(BalanceResponse.success(balance));
-        } catch (UserNotFoundException e) {
-            logger.warn("Balance retrieval failed: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (AccessDeniedException e) {
-            logger.warn("Unauthorized balance access attempt: {}", e.getMessage());
-            return ResponseEntity.status(403).body(BalanceResponse.failure("Access denied"));
-        } catch (Exception e) {
-            logger.error("Unexpected error during balance retrieval", e);
-            return ResponseEntity.internalServerError()
-                    .body(BalanceResponse.failure("An unexpected error occurred"));
-        }
+        Money balance = walletService.getBalance();
+        logger.info("Balance retrieved successfully");
+        return ResponseEntity.ok(BalanceResponse.success(balance));
     }
 
     /**
@@ -87,52 +76,25 @@ public class WalletController {
     public ResponseEntity<TransferResponse> transferMoney(@Valid @RequestBody TransferRequest request) {
         logger.info("Received money transfer request: {}", request);
 
-        try {
-            // Convert the amount to Money domain object
-            Money transferAmount = Money.of(request.getAmount());
+        // Convert the amount to Money domain object
+        Money transferAmount = Money.of(request.getAmount());
 
-            // Process the transfer
-            Transaction transaction = walletService.transferMoney(
-                    request.getRecipientPhone(),
-                    transferAmount);
+        // Process the transfer
+        Transaction transaction = walletService.transferMoney(
+                request.getRecipientPhone(),
+                transferAmount);
 
-            // Get the updated balance after transfer
-            Money newBalance = walletService.getBalance();
+        // Get the updated balance after transfer
+        Money newBalance = walletService.getBalance();
 
-            logger.info("Money transfer completed successfully. Transaction ID: {}", transaction.getId());
+        logger.info("Money transfer completed successfully. Transaction ID: {}", transaction.getId());
 
-            // Return success response with transaction details
-            return ResponseEntity.ok(TransferResponse.success(
-                    transaction.getId(),
-                    transaction.getAmount(),
-                    request.getRecipientPhone(),
-                    newBalance));
-
-        } catch (UserNotFoundException e) {
-            logger.warn("Transfer failed - recipient not found: {}", e.getMessage());
-            return ResponseEntity.status(404)
-                    .body(TransferResponse.failure("Recipient not found: " + request.getRecipientPhone()));
-
-        } catch (InsufficientFundsException e) {
-            logger.warn("Transfer failed - insufficient funds: {}", e.getMessage());
-            return ResponseEntity.status(400)
-                    .body(TransferResponse.failure("Insufficient funds for this transfer"));
-
-        } catch (IllegalArgumentException e) {
-            logger.warn("Transfer failed - invalid request: {}", e.getMessage());
-            return ResponseEntity.status(400)
-                    .body(TransferResponse.failure(e.getMessage()));
-
-        } catch (AccessDeniedException e) {
-            logger.warn("Unauthorized transfer attempt: {}", e.getMessage());
-            return ResponseEntity.status(403)
-                    .body(TransferResponse.failure("Access denied"));
-
-        } catch (Exception e) {
-            logger.error("Unexpected error during money transfer", e);
-            return ResponseEntity.internalServerError()
-                    .body(TransferResponse.failure("An unexpected error occurred"));
-        }
+        // Return success response with transaction details
+        return ResponseEntity.ok(TransferResponse.success(
+                transaction.getId(),
+                transaction.getAmount(),
+                request.getRecipientPhone(),
+                newBalance));
     }
 
     /**
@@ -145,44 +107,22 @@ public class WalletController {
     public ResponseEntity<DepositResponse> addFunds(@Valid @RequestBody DepositRequest request) {
         logger.info("Received fund addition request: {}", request);
 
-        try {
-            // Convert the amount to Money domain object
-            Money depositAmount = Money.of(request.getAmount());
+        // Convert the amount to Money domain object
+        Money depositAmount = Money.of(request.getAmount());
 
-            // Process the deposit
-            Transaction transaction = walletService.addFunds(depositAmount);
+        // Process the deposit
+        Transaction transaction = walletService.addFunds(depositAmount);
 
-            // Get the updated balance after deposit
-            Money newBalance = walletService.getBalance();
+        // Get the updated balance after deposit
+        Money newBalance = walletService.getBalance();
 
-            logger.info("Fund addition completed successfully. Transaction ID: {}", transaction.getId());
+        logger.info("Fund addition completed successfully. Transaction ID: {}", transaction.getId());
 
-            // Return success response with transaction details
-            return ResponseEntity.ok(DepositResponse.success(
-                    transaction.getId(),
-                    transaction.getAmount(),
-                    newBalance));
-
-        } catch (IllegalArgumentException e) {
-            logger.warn("Deposit failed - invalid request: {}", e.getMessage());
-            return ResponseEntity.status(400)
-                    .body(DepositResponse.failure(e.getMessage()));
-
-        } catch (UserNotFoundException e) {
-            logger.warn("Deposit failed - user not found: {}", e.getMessage());
-            return ResponseEntity.status(404)
-                    .body(DepositResponse.failure("User not found"));
-
-        } catch (AccessDeniedException e) {
-            logger.warn("Unauthorized deposit attempt: {}", e.getMessage());
-            return ResponseEntity.status(403)
-                    .body(DepositResponse.failure("Access denied"));
-
-        } catch (Exception e) {
-            logger.error("Unexpected error during fund addition", e);
-            return ResponseEntity.internalServerError()
-                    .body(DepositResponse.failure("An unexpected error occurred"));
-        }
+        // Return success response with transaction details
+        return ResponseEntity.ok(DepositResponse.success(
+                transaction.getId(),
+                transaction.getAmount(),
+                newBalance));
     }
 
     /**
@@ -196,33 +136,16 @@ public class WalletController {
     public ResponseEntity<TransactionHistoryResponse> getTransactionHistory() {
         logger.info("Received transaction history request for authenticated user");
 
-        try {
-            // Get current user ID for transaction direction determination
-            UserId currentUserId = getCurrentUserId();
+        // Get current user ID for transaction direction determination
+        UserId currentUserId = getCurrentUserId();
 
-            // Retrieve transaction history
-            List<Transaction> transactions = transactionQueryService.getTransactionHistory();
+        // Retrieve transaction history
+        List<Transaction> transactions = transactionQueryService.getTransactionHistory();
 
-            logger.info("Transaction history retrieved successfully. Found {} transactions", transactions.size());
+        logger.info("Transaction history retrieved successfully. Found {} transactions", transactions.size());
 
-            // Return success response with transaction details
-            return ResponseEntity.ok(TransactionHistoryResponse.success(transactions, currentUserId));
-
-        } catch (UserNotFoundException e) {
-            logger.warn("Transaction history retrieval failed - user not found: {}", e.getMessage());
-            return ResponseEntity.status(404)
-                    .body(TransactionHistoryResponse.failure("User not found"));
-
-        } catch (AccessDeniedException e) {
-            logger.warn("Unauthorized transaction history access attempt: {}", e.getMessage());
-            return ResponseEntity.status(403)
-                    .body(TransactionHistoryResponse.failure("Access denied"));
-
-        } catch (Exception e) {
-            logger.error("Unexpected error during transaction history retrieval", e);
-            return ResponseEntity.internalServerError()
-                    .body(TransactionHistoryResponse.failure("An unexpected error occurred"));
-        }
+        // Return success response with transaction details
+        return ResponseEntity.ok(TransactionHistoryResponse.success(transactions, currentUserId));
     }
 
     /**

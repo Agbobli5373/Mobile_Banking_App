@@ -51,34 +51,17 @@ public class AuthController {
     public ResponseEntity<UserRegistrationResponse> register(@Valid @RequestBody UserRegistrationRequest request) {
         logger.info("Received registration request for phone number: {}", request.getPhoneNumber());
 
-        try {
-            User registeredUser = userRegistrationService.registerUser(
-                    request.getName(),
-                    request.getPhoneNumber(),
-                    request.getPin());
+        User registeredUser = userRegistrationService.registerUser(
+                request.getName(),
+                request.getPhoneNumber(),
+                request.getPin());
 
-            UserRegistrationResponse response = UserRegistrationResponse.success(
-                    registeredUser.getId().asString(),
-                    registeredUser.getName().getValue(),
-                    registeredUser.getPhone().getValue());
+        UserRegistrationResponse response = UserRegistrationResponse.success(
+                registeredUser.getId().asString(),
+                registeredUser.getName().getValue(),
+                registeredUser.getPhone().getValue());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (DuplicatePhoneNumberException e) {
-            logger.warn("Registration failed: {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(UserRegistrationResponse.failure("Phone number already registered"));
-        } catch (InvalidUserNameException | InvalidPhoneNumberException | InvalidPinException e) {
-            logger.warn("Registration failed due to validation error: {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(UserRegistrationResponse.failure(e.getMessage()));
-        } catch (Exception e) {
-            logger.error("Unexpected error during registration", e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(UserRegistrationResponse.failure("An unexpected error occurred"));
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -91,37 +74,7 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         logger.info("Received login request for phone number: {}", request.getPhoneNumber());
 
-        try {
-            String token = loginService.login(request.getPhoneNumber(), request.getPin());
-            return ResponseEntity.ok(LoginResponse.success(token));
-        } catch (InvalidCredentialsException e) {
-            logger.warn("Login failed: {}", e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(LoginResponse.failure("Invalid phone number or PIN"));
-        } catch (Exception e) {
-            logger.error("Unexpected error during login", e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(LoginResponse.failure("An unexpected error occurred"));
-        }
-    }
-
-    /**
-     * Exception handler for validation errors.
-     *
-     * @param ex the validation exception
-     * @return map of field errors
-     */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
+        String token = loginService.login(request.getPhoneNumber(), request.getPin());
+        return ResponseEntity.ok(LoginResponse.success(token));
     }
 }

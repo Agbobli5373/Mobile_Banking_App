@@ -10,7 +10,7 @@ public class DuplicatePhoneNumberException extends RuntimeException {
 
     private final String phoneNumber;
 
-    private DuplicatePhoneNumberException(String message, String phoneNumber) {
+    public DuplicatePhoneNumberException(String message, String phoneNumber) {
         super(message);
         this.phoneNumber = phoneNumber;
     }
