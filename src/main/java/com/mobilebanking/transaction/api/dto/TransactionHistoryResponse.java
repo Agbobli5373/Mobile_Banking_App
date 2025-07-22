@@ -1,10 +1,9 @@
 package com.mobilebanking.transaction.api.dto;
 
-import com.mobilebanking.shared.domain.Money;
-import com.mobilebanking.shared.domain.TransactionId;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.transaction.domain.Transaction;
 import com.mobilebanking.transaction.domain.TransactionType;
+import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.util.List;
@@ -46,6 +45,34 @@ public class TransactionHistoryResponse {
     }
 
     /**
+     * Creates a successful paginated transaction history response.
+     *
+     * @param transactionsPage the page of transactions
+     * @param currentUserId    the ID of the current user (to determine transaction
+     *                         direction)
+     * @return a successful transaction history response with pagination information
+     */
+    public static TransactionHistoryResponse success(Page<Transaction> transactionsPage, UserId currentUserId) {
+        List<TransactionDto> transactionDtos = transactionsPage.getContent().stream()
+                .map(transaction -> TransactionDto.fromTransaction(transaction, currentUserId))
+                .collect(Collectors.toList());
+
+        return new TransactionHistoryResponse(
+                "success",
+                "Transaction history retrieved successfully",
+                new TransactionHistoryData(
+                        transactionDtos,
+                        (int) transactionsPage.getTotalElements(),
+                        transactionsPage.getNumber(),
+                        transactionsPage.getSize(),
+                        transactionsPage.getTotalPages(),
+                        transactionsPage.isFirst(),
+                        transactionsPage.isLast(),
+                        transactionsPage.hasNext(),
+                        transactionsPage.hasPrevious()));
+    }
+
+    /**
      * Creates a failure transaction history response.
      *
      * @param message the error message
@@ -71,12 +98,52 @@ public class TransactionHistoryResponse {
      * Inner class representing transaction history data.
      */
     public static class TransactionHistoryData {
-        private final List<TransactionDto> transactions;
-        private final int totalCount;
+        // Remove final modifiers to allow Jackson deserialization
+        private List<TransactionDto> transactions;
+        private int totalCount;
+        private Integer pageNumber;
+        private Integer pageSize;
+        private Integer totalPages;
+        private Boolean isFirstPage;
+        private Boolean isLastPage;
+        private Boolean hasNextPage;
+        private Boolean hasPreviousPage;
+
+        // Default constructor for Jackson deserialization
+        public TransactionHistoryData() {
+        }
 
         public TransactionHistoryData(List<TransactionDto> transactions, int totalCount) {
             this.transactions = transactions;
             this.totalCount = totalCount;
+            this.pageNumber = null;
+            this.pageSize = null;
+            this.totalPages = null;
+            this.isFirstPage = null;
+            this.isLastPage = null;
+            this.hasNextPage = null;
+            this.hasPreviousPage = null;
+        }
+
+        public TransactionHistoryData(
+                List<TransactionDto> transactions,
+                int totalCount,
+                int pageNumber,
+                int pageSize,
+                int totalPages,
+                boolean isFirstPage,
+                boolean isLastPage,
+                boolean hasNextPage,
+                boolean hasPreviousPage) {
+            this.transactions = transactions;
+            this.totalCount = totalCount;
+            this.pageNumber = pageNumber;
+            this.pageSize = pageSize;
+            this.totalPages = totalPages;
+            this.isFirstPage = isFirstPage;
+            this.isLastPage = isLastPage;
+            this.hasNextPage = hasNextPage;
+            this.hasPreviousPage = hasPreviousPage;
         }
 
         public List<TransactionDto> getTransactions() {
@@ -86,19 +153,88 @@ public class TransactionHistoryResponse {
         public int getTotalCount() {
             return totalCount;
         }
+
+        public Integer getPageNumber() {
+            return pageNumber;
+        }
+
+        public Integer getPageSize() {
+            return pageSize;
+        }
+
+        public Integer getTotalPages() {
+            return totalPages;
+        }
+
+        public Boolean getIsFirstPage() {
+            return isFirstPage;
+        }
+
+        public Boolean getIsLastPage() {
+            return isLastPage;
+        }
+
+        public Boolean getHasNextPage() {
+            return hasNextPage;
+        }
+
+        public Boolean getHasPreviousPage() {
+            return hasPreviousPage;
+        }
+
+        // Setters for Jackson deserialization
+        public void setTransactions(List<TransactionDto> transactions) {
+            this.transactions = transactions;
+        }
+
+        public void setTotalCount(int totalCount) {
+            this.totalCount = totalCount;
+        }
+
+        public void setPageNumber(Integer pageNumber) {
+            this.pageNumber = pageNumber;
+        }
+
+        public void setPageSize(Integer pageSize) {
+            this.pageSize = pageSize;
+        }
+
+        public void setTotalPages(Integer totalPages) {
+            this.totalPages = totalPages;
+        }
+
+        public void setIsFirstPage(Boolean isFirstPage) {
+            this.isFirstPage = isFirstPage;
+        }
+
+        public void setIsLastPage(Boolean isLastPage) {
+            this.isLastPage = isLastPage;
+        }
+
+        public void setHasNextPage(Boolean hasNextPage) {
+            this.hasNextPage = hasNextPage;
+        }
+
+        public void setHasPreviousPage(Boolean hasPreviousPage) {
+            this.hasPreviousPage = hasPreviousPage;
+        }
     }
 
     /**
      * Inner class representing individual transaction data.
      */
     public static class TransactionDto {
-        private final String transactionId;
-        private final double amount;
-        private final String currency;
-        private final String type;
-        private final String direction; // "sent", "received", "deposit"
-        private final String counterpartyId; // The other party in the transaction (null for deposits)
-        private final Instant timestamp;
+        private String transactionId;
+        private double amount;
+        private String currency;
+        private String type;
+        private String direction; // "sent", "received", "deposit"
+        private String counterpartyId; // The other party in the transaction (null for deposits)
+        private Instant timestamp;
+
+        // Default constructor for Jackson deserialization
+        public TransactionDto() {
+        }
 
         public TransactionDto(String transactionId, double amount, String currency, String type,
                 String direction, String counterpartyId, Instant timestamp) {
@@ -173,6 +309,35 @@ public class TransactionHistoryResponse {
 
         public Instant getTimestamp() {
             return timestamp;
+        }
+
+        // Setters for Jackson deserialization
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
+
+        public void setCurrency(String currency) {
+            this.currency = currency;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public void setDirection(String direction) {
+            this.direction = direction;
+        }
+
+        public void setCounterpartyId(String counterpartyId) {
+            this.counterpartyId = counterpartyId;
+        }
+
+        public void setTimestamp(Instant timestamp) {
+            this.timestamp = timestamp;
         }
     }
 }

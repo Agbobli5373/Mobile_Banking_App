@@ -96,7 +96,7 @@
   - Write integration tests for fund addition API
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 12. Implement transaction history service and API
+- [x] 12. Implement transaction history service and API
 
   - Create TransactionQueryService application service
   - Implement transaction history retrieval with proper filtering

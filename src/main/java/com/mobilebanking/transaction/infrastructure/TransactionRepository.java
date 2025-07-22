@@ -4,6 +4,12 @@ import com.mobilebanking.shared.domain.TransactionId;
 import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.transaction.domain.Transaction;
 import com.mobilebanking.transaction.domain.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,6 +56,31 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
      */
     default List<Transaction> findByUserOrderByTimestampDesc(UserId userId) {
         return findByUserIdOrderByTimestampDesc(userId.asString());
+    }
+
+    /**
+     * Finds all transactions where the user is either sender or receiver with
+     * pagination, ordered
+     * by timestamp descending.
+     * 
+     * @param userId   the user ID to search for
+     * @param pageable the pagination information
+     * @return Page of transactions involving the user, ordered by most recent first
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.senderId = :userId OR t.receiverId = :userId ORDER BY t.timestamp.timestamp DESC")
+    Page<Transaction> findByUserIdOrderByTimestampDesc(@Param("userId") String userId, Pageable pageable);
+
+    /**
+     * Finds all transactions where the user is either sender or receiver with
+     * pagination using
+     * domain object.
+     * 
+     * @param userId   the user ID domain object to search for
+     * @param pageable the pagination information
+     * @return Page of transactions involving the user, ordered by most recent first
+     */
+    default Page<Transaction> findByUserOrderByTimestampDesc(UserId userId, Pageable pageable) {
+        return findByUserIdOrderByTimestampDesc(userId.asString(), pageable);
     }
 
     /**
@@ -165,6 +196,60 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
      */
     default long countByUser(UserId userId) {
         return countByUserId(userId.asString());
+    }
+
+    /**
+     * Finds all transactions where the user is either sender or receiver, with
+     * pagination,
+     * ordered by timestamp descending.
+     * 
+     * @param userId   the user ID to search for
+     * @param pageable pagination information
+     * @return Page of transactions involving the user, ordered by most recent first
+     */
+//    @Query("SELECT t FROM Transaction t WHERE t.senderId = :userId OR t.receiverId = :userId ORDER BY t.timestamp.timestamp DESC")
+//    Page<Transaction> findByUserIdOrderByTimestampDesc(@Param("userId") String userId, Pageable pageable);
+//
+//    /**
+//     * Finds all transactions where the user is either sender or receiver using
+//     * domain object, with pagination.
+//     *
+//     * @param userId   the user ID domain object to search for
+//     * @param pageable pagination information
+//     * @return Page of transactions involving the user, ordered by most recent first
+//     */
+//    default Page<Transaction> findByUserOrderByTimestampDesc(UserId userId, Pageable pageable) {
+//        return findByUserIdOrderByTimestampDesc(userId.asString(), pageable);
+//    }
+
+    /**
+     * Finds all transactions of a specific type involving a user, with pagination,
+     * ordered by timestamp descending.
+     * 
+     * @param userId   the user ID to search for
+     * @param type     the transaction type to filter by
+     * @param pageable pagination information
+     * @return Page of transactions of the specified type involving the user
+     */
+    @Query("SELECT t FROM Transaction t WHERE (t.senderId = :userId OR t.receiverId = :userId) AND t.type = :type ORDER BY t.timestamp.timestamp DESC")
+    Page<Transaction> findByUserIdAndTypeOrderByTimestampDesc(
+            @Param("userId") String userId,
+            @Param("type") TransactionType type,
+            Pageable pageable);
+
+    /**
+     * Finds all transactions of a specific type involving a user using domain
+     * objects,
+     * with pagination.
+     * 
+     * @param userId   the user ID domain object to search for
+     * @param type     the transaction type to filter by
+     * @param pageable pagination information
+     * @return Page of transactions of the specified type involving the user
+     */
+    default Page<Transaction> findByUserAndTypeOrderByTimestampDesc(UserId userId, TransactionType type,
+            Pageable pageable) {
+        return findByUserIdAndTypeOrderByTimestampDesc(userId.asString(), type, pageable);
     }
 
     /**

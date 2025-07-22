@@ -1,7 +1,6 @@
 package com.mobilebanking.user.application;
 
 import com.mobilebanking.shared.domain.PhoneNumber;
-import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.shared.domain.exception.DuplicatePhoneNumberException;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.domain.UserName;

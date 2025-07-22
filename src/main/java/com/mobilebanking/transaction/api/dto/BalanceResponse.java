@@ -28,7 +28,7 @@ public class BalanceResponse {
         return new BalanceResponse(
                 "success",
                 "Balance retrieved successfully",
-                new BalanceData(balance.getAmount().doubleValue(), "USD")); // Default to USD as currency
+                new BalanceData(balance.getAmount().doubleValue(), "GHS")); // Default to GHS as currency
     }
 
     /**
