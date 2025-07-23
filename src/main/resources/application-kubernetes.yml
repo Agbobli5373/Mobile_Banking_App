@@ -1,0 +1,117 @@
+spring:
+  application:
+    name: mobile-banking-backend
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  # PostgreSQL configuration for Kubernetes
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres-service}:${DB_PORT:5432}/${DB_NAME:mobilebanking}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:mobilebanking}
+    password: ${DB_PASSWORD:password}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+
+  # JPA configuration for PostgreSQL
+  jpa:
+    hibernate:
+      ddl-auto: validate # Use Flyway for schema management
+    show-sql: false # Disable in production
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # Flyway migration configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    clean-disabled: true
+
+# JWT configuration with environment variables
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForKubernetes123456789012345678901234567890}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+  validity:
+    hours: ${JWT_VALIDITY_HOURS:24}
+
+# Actuator configuration for health checks and metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+      percentiles:
+        "[http.server.requests]": 0.5, 0.95, 0.99
+      slo:
+        "[http.server.requests]": 100ms, 200ms, 500ms, 1s, 2s
+
+# Logging configuration for Kubernetes
+logging:
+  level:
+    com.mobilebanking: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.springframework.web: WARN
+    org.springframework.boot.actuator: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+    max-connections: 8192
+
+# Spring Boot graceful shutdown is configured in the main spring section
+
+# OpenAPI documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

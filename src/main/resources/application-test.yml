@@ -32,3 +32,9 @@ logging:
 # Server configuration for testing
 server:
   port: 0 # Random port for testing
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

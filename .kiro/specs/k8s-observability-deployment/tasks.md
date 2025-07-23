@@ -1,13 +1,13 @@
 # Implementation Plan
 
-- [ ] 1. Configure Spring Boot application for Kubernetes deployment
+- [x] 1. Configure Spring Boot application for Kubernetes deployment
 
   - Add Spring Boot Actuator dependencies and configuration for health checks and metrics
   - Configure Micrometer Prometheus registry for metrics export
   - Create Kubernetes-specific application profile with PostgreSQL configuration
   - _Requirements: 1.1, 1.2, 2.1, 7.1_
 
-- [ ] 2. Add observability dependencies and configuration
+- [-] 2. Add observability dependencies and configuration
 
   - Add OpenTelemetry dependencies for distributed tracing
   - Configure structured logging with JSON format and correlation IDs
