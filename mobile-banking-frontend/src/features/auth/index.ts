@@ -1,4 +1,6 @@
-// Auth feature exports will go here
+// Auth feature exports
+export { RegisterForm } from './components/RegisterForm';
+export { registerSchema, type RegisterFormData } from './schemas/registerSchema';
+
+// Future exports
 // export { LoginForm } from './components/LoginForm';
-// export { RegisterForm } from './components/RegisterForm';
-// export { useAuth } from './hooks/useAuth';

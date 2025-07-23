@@ -1,6 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AppLayout, AuthLayout } from '@/components/layout';
-import { ToastContainer } from '@/components/ui';
+import { AuthProvider } from './contexts/AuthContext';
+import { AppLayout, AuthLayout } from './components/layout';
+import {
+  AuthGuard,
+  ProtectedRoute,
+  PublicRoute,
+} from './components/auth/AuthGuard';
+import { ToastContainer } from './components/ui';
+import { RegisterForm } from './features/auth';
 
 // This is a placeholder component for demonstration purposes
 // In a real app, these would be actual feature components
@@ -14,76 +21,150 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Auth routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<PlaceholderPage title="Login" />} />
+      <AuthProvider>
+        <Routes>
+          {/* Public routes - redirect authenticated users to dashboard */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <AuthLayout>
+                  <PlaceholderPage title="Login" />
+                </AuthLayout>
+              </PublicRoute>
+            }
+          />
           <Route
             path="/register"
-            element={<PlaceholderPage title="Register" />}
+            element={
+              <PublicRoute>
+                <AuthLayout>
+                  <RegisterForm />
+                </AuthLayout>
+              </PublicRoute>
+            }
           />
           <Route
             path="/forgot-password"
-            element={<PlaceholderPage title="Forgot Password" />}
+            element={
+              <PublicRoute>
+                <AuthLayout>
+                  <PlaceholderPage title="Forgot Password" />
+                </AuthLayout>
+              </PublicRoute>
+            }
           />
-        </Route>
 
-        {/* App routes */}
-        <Route element={<AppLayout />}>
+          {/* Protected routes - require authentication */}
           <Route
             path="/dashboard"
-            element={<PlaceholderPage title="Dashboard" />}
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PlaceholderPage title="Dashboard" />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/transactions"
-            element={<PlaceholderPage title="Transactions" />}
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PlaceholderPage title="Transactions" />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/transfer"
-            element={<PlaceholderPage title="Transfer Money" />}
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PlaceholderPage title="Transfer Money" />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/add-funds"
-            element={<PlaceholderPage title="Add Funds" />}
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PlaceholderPage title="Add Funds" />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/settings"
-            element={<PlaceholderPage title="Settings" />}
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <PlaceholderPage title="Settings" />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           />
 
-          {/* Static pages */}
+          {/* Static pages - accessible to all users */}
           <Route
             path="/terms"
-            element={<PlaceholderPage title="Terms of Service" />}
+            element={
+              <AppLayout>
+                <PlaceholderPage title="Terms of Service" />
+              </AppLayout>
+            }
           />
           <Route
             path="/privacy"
-            element={<PlaceholderPage title="Privacy Policy" />}
+            element={
+              <AppLayout>
+                <PlaceholderPage title="Privacy Policy" />
+              </AppLayout>
+            }
           />
           <Route
             path="/help"
-            element={<PlaceholderPage title="Help Center" />}
+            element={
+              <AppLayout>
+                <PlaceholderPage title="Help Center" />
+              </AppLayout>
+            }
           />
           <Route
             path="/contact"
-            element={<PlaceholderPage title="Contact Us" />}
+            element={
+              <AppLayout>
+                <PlaceholderPage title="Contact Us" />
+              </AppLayout>
+            }
           />
-        </Route>
 
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Root redirect - redirect to dashboard if authenticated, login if not */}
+          <Route
+            path="/"
+            element={
+              <AuthGuard>
+                <Navigate to="/dashboard" replace />
+              </AuthGuard>
+            }
+          />
 
-        {/* Catch all - 404 */}
-        <Route
-          path="*"
-          element={<PlaceholderPage title="404 - Page Not Found" />}
-        />
-      </Routes>
+          {/* Catch all - 404 */}
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <PlaceholderPage title="404 - Page Not Found" />
+              </div>
+            }
+          />
+        </Routes>
 
-      {/* Global toast notifications */}
-      <ToastContainer toasts={[]} onClose={function (): void {
-        throw new Error('Function not implemented.');
-      } } />
+        {/* Global toast notifications */}
+        <ToastContainer toasts={[]} onClose={() => {}} />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

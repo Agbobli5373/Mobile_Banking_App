@@ -1,4 +1,13 @@
-// TypeScript type definitions will go here
-// export type { User } from './user';
-// export type { Transaction } from './transaction';
-// export type { ApiResponse } from './api';
+export type {
+    ApiResponse,
+    ApiError,
+    LoginRequest,
+    RegisterRequest,
+    AuthResponse,
+    User,
+    TransferRequest,
+    AddFundsRequest,
+    Transaction,
+    TransactionHistory,
+    TransactionFilters
+} from './api';

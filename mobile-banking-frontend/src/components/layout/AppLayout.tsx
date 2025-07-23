@@ -9,9 +9,13 @@ export interface AppLayoutProps {
    * Optional className for additional styling
    */
   className?: string;
+  /**
+   * Children to render in the app layout
+   */
+  children?: React.ReactNode;
 }
 
-export const AppLayout = ({ className = '' }: AppLayoutProps) => {
+export const AppLayout = ({ className = '', children }: AppLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -59,9 +63,7 @@ export const AppLayout = ({ className = '' }: AppLayoutProps) => {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-200 overflow-x-hidden">
           {/* Page content */}
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
-          </div>
+          <div className="max-w-7xl mx-auto">{children || <Outlet />}</div>
 
           {/* Back to top button - visible when scrolled down */}
           <button
@@ -89,7 +91,7 @@ export const AppLayout = ({ className = '' }: AppLayoutProps) => {
       <Footer />
 
       {/* Add scroll behavior styles */}
-      <style jsx global>{`
+      <style>{`
         .scroll-visible {
           transition:
             opacity 0.3s,

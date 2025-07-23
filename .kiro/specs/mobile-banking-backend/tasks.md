@@ -132,7 +132,7 @@
   - Write tests for audit logging functionality
   - _Requirements: 7.1, 7.2, 7.5_
 
-- [ ] 16. Build notification system for money transfers
+- [x] 16. Build notification system for money transfers
 
   - Create NotificationService interface for extensible notification types
   - Implement in-memory notification service for transfer alerts

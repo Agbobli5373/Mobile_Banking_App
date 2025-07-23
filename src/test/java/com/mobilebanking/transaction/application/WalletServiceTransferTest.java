@@ -8,6 +8,7 @@ import com.mobilebanking.shared.domain.exception.UserNotFoundException;
 import com.mobilebanking.transaction.domain.MoneyTransferService;
 import com.mobilebanking.transaction.domain.Transaction;
 import com.mobilebanking.transaction.infrastructure.TransactionRepository;
+import com.mobilebanking.notification.domain.NotificationService;
 import com.mobilebanking.user.domain.HashedPin;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.domain.UserName;
@@ -39,6 +40,9 @@ class WalletServiceTransferTest {
     private MoneyTransferService moneyTransferService;
 
     @Mock
+    private NotificationService notificationService;
+
+    @Mock
     private Authentication authentication;
 
     private WalletService walletService;
@@ -66,7 +70,8 @@ class WalletServiceTransferTest {
         recipient = User.reconstitute(recipientId, recipientName, recipientPhone, recipientPin, Money.zero());
 
         // Initialize the service with mocked dependencies
-        walletService = new WalletService(userRepository, transactionRepository, moneyTransferService) {
+        walletService = new WalletService(userRepository, transactionRepository, moneyTransferService,
+                notificationService) {
             @Override
             protected Authentication getAuthentication() {
                 return authentication;

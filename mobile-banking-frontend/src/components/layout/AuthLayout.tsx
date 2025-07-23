@@ -1,5 +1,5 @@
 import { Outlet, Link } from 'react-router-dom';
-import { APP_NAME } from '@/constants';
+import { APP_NAME } from '../../constants';
 import { CreditCard, Shield, HelpCircle } from 'lucide-react';
 
 export interface AuthLayoutProps {
@@ -7,9 +7,13 @@ export interface AuthLayoutProps {
    * Optional className for additional styling
    */
   className?: string;
+  /**
+   * Children to render in the auth layout
+   */
+  children?: React.ReactNode;
 }
 
-export const AuthLayout = ({ className = '' }: AuthLayoutProps) => {
+export const AuthLayout = ({ className = '', children }: AuthLayoutProps) => {
   return (
     <div
       className={`min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col ${className}`}
@@ -41,7 +45,7 @@ export const AuthLayout = ({ className = '' }: AuthLayoutProps) => {
               <p className="text-gray-600 mt-2">Secure Mobile Banking</p>
             </div>
 
-            <Outlet />
+            {children || <Outlet />}
           </div>
 
           {/* Security features */}

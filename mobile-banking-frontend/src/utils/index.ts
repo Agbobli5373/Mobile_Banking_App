@@ -1,3 +1,8 @@
-// Utility function exports will go here
-// export { formatCurrency } from './formatCurrency';
-// export { validatePhone } from './validation';
+// Export error handling utilities
+export {
+    errorMessages,
+    getErrorMessage,
+    isNetworkError,
+    shouldRetry,
+    formatErrorForLogging
+} from './errorHandling';

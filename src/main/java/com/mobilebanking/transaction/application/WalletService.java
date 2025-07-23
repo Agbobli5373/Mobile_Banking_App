@@ -1,5 +1,6 @@
 package com.mobilebanking.transaction.application;
 
+import com.mobilebanking.notification.domain.NotificationService;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.shared.domain.UserId;
@@ -29,13 +30,16 @@ public class WalletService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final MoneyTransferService moneyTransferService;
+    private final NotificationService notificationService;
 
     public WalletService(UserRepository userRepository,
             TransactionRepository transactionRepository,
-            MoneyTransferService moneyTransferService) {
+            MoneyTransferService moneyTransferService,
+            NotificationService notificationService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.moneyTransferService = moneyTransferService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -142,6 +146,9 @@ public class WalletService {
         userRepository.save(recipient);
         transactionRepository.save(transaction);
 
+        // Send notifications to both sender and receiver
+        notificationService.notifyTransfer(sender.getId(), recipient.getId(), amount);
+
         logger.info("Money transfer completed successfully. Transaction ID: {}", transaction.getId());
         return transaction;
     }
@@ -183,6 +190,9 @@ public class WalletService {
         // Save all changes
         userRepository.save(user);
         transactionRepository.save(transaction);
+
+        // Send deposit notification to user
+        notificationService.notifyDeposit(user.getId(), amount);
 
         logger.info("Fund addition completed successfully. Transaction ID: {}, New balance: {}",
                 transaction.getId(), user.getBalance());

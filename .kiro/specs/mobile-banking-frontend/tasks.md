@@ -29,7 +29,7 @@
   - Test responsive behavior across mobile, tablet, and desktop breakpoints
   - _Requirements: 7.1, 7.2, 8.2_
 
-- [-] 4. Set up API service layer and HTTP client configuration
+- [ ] 4. Set up API service layer and HTTP client configuration
 
   - Configure Axios with base URL, request/response interceptors, and timeout settings
   - Create authService with login, register, and token refresh methods
@@ -59,7 +59,7 @@
   - Build registration success flow with automatic redirect to login
   - Create user-friendly error messages for duplicate phone and validation errors
   - Implement responsive design for registration form across all screen sizes
-  - Write integration tests for registration workflow including error scenarios
+  - Write integration tests for registration workflow including error scenarios(No test fro now)
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
 - [ ] 7. Implement login functionality with secure authentication
@@ -70,7 +70,7 @@
   - Build automatic redirect logic for authenticated users
   - Create session timeout handling with user-friendly messages
   - Add "Remember me" functionality for improved user experience
-  - Write comprehensive tests for login flows and edge cases
+  - Write comprehensive tests for login flows and edge cases (no test for now)
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
 - [ ] 8. Create dashboard with balance display and quick actions
@@ -81,7 +81,7 @@
   - Add balance fetching with React Query for caching and automatic updates
   - Implement proper currency formatting with locale-specific display
   - Build error handling for balance loading failures with retry functionality
-  - Write tests for dashboard components and balance display logic
+  - Write tests for dashboard components and balance display logic(no test)
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
 - [ ] 9. Implement money transfer functionality with validation
@@ -92,7 +92,7 @@
   - Build transfer API integration with loading states and error handling
   - Create success feedback with balance update and transaction confirmation
   - Add transfer history integration to show immediate transaction updates
-  - Write comprehensive tests for transfer workflows including validation and error scenarios
+  - Write comprehensive tests for transfer workflows including validation and error scenarios(no test)
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
 - [ ] 10. Build fund addition feature with amount validation
@@ -103,7 +103,7 @@
   - Build fund addition API integration with loading states and success feedback
   - Create automatic balance update after successful fund addition
   - Implement error handling for failed fund additions with retry options
-  - Write tests for fund addition workflows and validation logic
+  - Write tests for fund addition workflows and validation logic (no test)
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
 - [ ] 11. Create transaction history with pagination and filtering
