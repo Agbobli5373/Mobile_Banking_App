@@ -1,0 +1,74 @@
+# Docker Compose Production Configuration
+# Use this file for production deployments: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  mobile-banking-backend:
+    # Production-specific environment variables
+    environment:
+      - LOGGING_LEVEL_ROOT=WARN
+      - LOGGING_LEVEL_COM_MOBILEBANKING=INFO
+      - SPRING_JPA_SHOW_SQL=false
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=false
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.01 # Reduce sampling in production
+    # Enhanced resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.0"
+        reservations:
+          memory: 1G
+          cpus: "0.5"
+      replicas: 2 # Run multiple instances
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    # Remove debug port exposure
+    ports:
+      - "8080:8080"
+    # Production health check with shorter intervals
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+  postgres:
+    # Production PostgreSQL configuration
+    environment:
+      - POSTGRES_SHARED_PRELOAD_LIBRARIES=pg_stat_statements
+      - POSTGRES_MAX_CONNECTIONS=200
+      - POSTGRES_SHARED_BUFFERS=256MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=1GB
+      - POSTGRES_WORK_MEM=4MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=64MB
+    # Enhanced resource limits for production database
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.2"
+    # Remove external port exposure for security
+    ports: []
+    # Production health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mobilebanking -d mobilebanking"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+
+# Production volumes with specific driver options
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/docker/volumes/mobile-banking-postgres

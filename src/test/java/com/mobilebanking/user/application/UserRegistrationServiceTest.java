@@ -7,6 +7,7 @@ import com.mobilebanking.shared.domain.exception.InvalidPinException;
 import com.mobilebanking.shared.domain.exception.InvalidUserNameException;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.infrastructure.UserRepository;
+import com.mobilebanking.observability.ObservabilityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ class UserRegistrationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ObservabilityService observabilityService;
 
     @InjectMocks
     private UserRegistrationService userRegistrationService;

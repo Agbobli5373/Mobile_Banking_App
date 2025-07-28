@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Frontend (if present)
+mobile-banking-frontend/
+
+# Kiro specs
+.kiro/
+
+# Maven wrapper (not needed when using Maven image)
+mvnw
+mvnw.cmd
+.mvn
+
+# Test files
+src/test/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files
+.env
+.env.local
+.env.production

@@ -1,5 +1,6 @@
 package com.mobilebanking.user.application;
 
+import com.mobilebanking.observability.ObservabilityService;
 import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.shared.domain.exception.DuplicatePhoneNumberException;
 import com.mobilebanking.user.domain.User;
@@ -19,9 +20,11 @@ public class UserRegistrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserRegistrationService.class);
     private final UserRepository userRepository;
+    private final ObservabilityService observabilityService;
 
-    public UserRegistrationService(UserRepository userRepository) {
+    public UserRegistrationService(UserRepository userRepository, ObservabilityService observabilityService) {
         this.userRepository = userRepository;
+        this.observabilityService = observabilityService;
     }
 
     /**
@@ -51,6 +54,9 @@ public class UserRegistrationService {
         // Create and save user
         User user = User.create(userName, phone, pin);
         User savedUser = userRepository.save(user);
+
+        // Record user registration metric
+        observabilityService.recordUserRegistration(savedUser.getId().asString());
 
         logger.info("User registered successfully with ID: {}", savedUser.getId());
         return savedUser;

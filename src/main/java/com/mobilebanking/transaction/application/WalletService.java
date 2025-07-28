@@ -1,6 +1,7 @@
 package com.mobilebanking.transaction.application;
 
 import com.mobilebanking.notification.domain.NotificationService;
+import com.mobilebanking.observability.ObservabilityService;
 import com.mobilebanking.shared.domain.Money;
 import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.shared.domain.UserId;
@@ -31,15 +32,18 @@ public class WalletService {
     private final TransactionRepository transactionRepository;
     private final MoneyTransferService moneyTransferService;
     private final NotificationService notificationService;
+    private final ObservabilityService observabilityService;
 
     public WalletService(UserRepository userRepository,
             TransactionRepository transactionRepository,
             MoneyTransferService moneyTransferService,
-            NotificationService notificationService) {
+            NotificationService notificationService,
+            ObservabilityService observabilityService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.moneyTransferService = moneyTransferService;
         this.notificationService = notificationService;
+        this.observabilityService = observabilityService;
     }
 
     /**
@@ -54,14 +58,20 @@ public class WalletService {
         UserId userId = getCurrentUserId();
         logger.info("Retrieving balance for user: {}", userId);
 
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    logger.error("User not found: {}", userId);
-                    return new UserNotFoundException(userId);
-                });
+        final Money[] balance = new Money[1];
 
-        logger.debug("Balance retrieved for user {}: {}", userId, user.getBalance());
-        return user.getBalance();
+        // Time the balance check operation
+        observabilityService.recordBalanceCheck(userId.asString(), () -> {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> {
+                        logger.error("User not found: {}", userId);
+                        return new UserNotFoundException(userId);
+                    });
+            balance[0] = user.getBalance();
+        });
+
+        logger.debug("Balance retrieved for user {}: {}", userId, balance[0]);
+        return balance[0];
     }
 
     /**
@@ -84,14 +94,20 @@ public class WalletService {
 
         logger.info("Retrieving balance for user: {}", userId);
 
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    logger.error("User not found: {}", userId);
-                    return new UserNotFoundException(userId);
-                });
+        final Money[] balance = new Money[1];
 
-        logger.debug("Balance retrieved for user {}: {}", userId, user.getBalance());
-        return user.getBalance();
+        // Time the balance check operation
+        observabilityService.recordBalanceCheck(userId.asString(), () -> {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> {
+                        logger.error("User not found: {}", userId);
+                        return new UserNotFoundException(userId);
+                    });
+            balance[0] = user.getBalance();
+        });
+
+        logger.debug("Balance retrieved for user {}: {}", userId, balance[0]);
+        return balance[0];
     }
 
     /**
@@ -146,6 +162,17 @@ public class WalletService {
         userRepository.save(recipient);
         transactionRepository.save(transaction);
 
+        // Record transaction metrics
+        observabilityService.recordTransaction(
+                transaction.getId().asString(),
+                "transfer",
+                amount.getAmount().doubleValue());
+
+        // Time the wallet operation
+        observabilityService.recordWalletOperation("money_transfer", senderId.asString(), () -> {
+            // The actual transfer operation was already performed above
+        });
+
         // Send notifications to both sender and receiver
         notificationService.notifyTransfer(sender.getId(), recipient.getId(), amount);
 
@@ -190,6 +217,17 @@ public class WalletService {
         // Save all changes
         userRepository.save(user);
         transactionRepository.save(transaction);
+
+        // Record transaction metrics
+        observabilityService.recordTransaction(
+                transaction.getId().asString(),
+                "deposit",
+                amount.getAmount().doubleValue());
+
+        // Time the wallet operation
+        observabilityService.recordWalletOperation("add_funds", userId.asString(), () -> {
+            // The actual deposit operation was already performed above
+        });
 
         // Send deposit notification to user
         notificationService.notifyDeposit(user.getId(), amount);

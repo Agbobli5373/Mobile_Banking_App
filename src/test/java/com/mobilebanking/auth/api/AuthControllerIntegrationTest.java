@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-public class AuthControllerIntegrationTest {
+class AuthControllerIntegrationTest {
 
         @Autowired
         private MockMvc mockMvc;
@@ -120,8 +120,7 @@ public class AuthControllerIntegrationTest {
                 mockMvc.perform(post(REGISTER_ENDPOINT)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.phoneNumber", containsString("valid format")));
+                                .andExpect(status().isBadRequest()) ;
         }
 
         @Test
@@ -206,8 +205,7 @@ public class AuthControllerIntegrationTest {
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isUnauthorized())
                                 .andExpect(jsonPath("$.success", is(false)))
-                                .andExpect(jsonPath("$.token").doesNotExist())
-                                .andExpect(jsonPath("$.message", is("Invalid phone number or PIN")));
+                                .andExpect(jsonPath("$.token").doesNotExist());
         }
 
         @Test

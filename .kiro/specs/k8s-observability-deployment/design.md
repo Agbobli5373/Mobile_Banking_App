@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design outlines the deployment of the mobile banking backend application to Kubernetes with comprehensive observability capabilities. The solution includes containerization of the Spring Boot application, PostgreSQL database deployment, Prometheus metrics collection, Grafana visualization, distributed tracing with Jaeger, and centralized logging. The architecture follows cloud-native best practices with proper resource management, health checks, and security configurations.
+This design outlines the deployment of the mobile banking backend application using Docker Compose with comprehensive observability capabilities. The solution includes containerization of the Spring Boot application, PostgreSQL database service, Prometheus metrics collection, Grafana visualization, distributed tracing with Jaeger, and centralized logging. The architecture follows containerization best practices with proper resource management, health checks, and security configurations.
 
 ## Architecture
 
@@ -10,14 +10,14 @@ This design outlines the deployment of the mobile banking backend application to
 
 ```mermaid
 graph TB
-    subgraph "Kubernetes Cluster"
-        subgraph "Application Namespace"
+    subgraph "Docker Compose Environment"
+        subgraph "Application Services"
             APP[Mobile Banking Backend]
             DB[(PostgreSQL)]
             APP --> DB
         end
 
-        subgraph "Observability Namespace"
+        subgraph "Observability Services"
             PROM[Prometheus]
             GRAF[Grafana]
             JAEGER[Jaeger]
@@ -28,11 +28,11 @@ graph TB
             LOKI --> GRAF
         end
 
-        subgraph "Ingress"
-            ING[Ingress Controller]
-            ING --> APP
-            ING --> GRAF
-            ING --> JAEGER
+        subgraph "Reverse Proxy"
+            NGINX[Nginx]
+            NGINX --> APP
+            NGINX --> GRAF
+            NGINX --> JAEGER
         end
 
         APP -.->|metrics| PROM
@@ -40,7 +40,7 @@ graph TB
         APP -.->|logs| LOKI
     end
 
-    EXT[External Users] --> ING
+    EXT[External Users] --> NGINX
 ```
 
 ### Component Architecture
@@ -69,12 +69,12 @@ graph TB
 **Configuration**:
 
 ```yaml
-# Application properties for Kubernetes
+# Application properties for Docker Compose
 spring:
   profiles:
-    active: kubernetes
+    active: docker
   datasource:
-    url: jdbc:postgresql://postgres-service:5432/mobilebanking
+    url: jdbc:postgresql://postgres:5432/mobilebanking
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 management:
@@ -91,30 +91,29 @@ management:
         enabled: true
 ```
 
-### 2. Database Deployment
+### 2. Database Service
 
 **Purpose**: PostgreSQL database with persistent storage and monitoring
 
 **Key Components**:
 
-- StatefulSet for PostgreSQL deployment
-- PersistentVolumeClaim for data persistence
-- ConfigMap for database initialization
-- Secret for credentials management
+- Docker Compose service for PostgreSQL
+- Docker volumes for data persistence
+- Environment files for database initialization
+- Docker secrets for credentials management
 - PostgreSQL Exporter for metrics
 
 **Storage Configuration**:
 
-- Storage Class: SSD-backed persistent volumes
-- Size: 20Gi (configurable)
-- Access Mode: ReadWriteOnce
-- Backup strategy: Automated snapshots
+- Docker volumes for data persistence
+- Size: Configurable through Docker volume settings
+- Backup strategy: Volume-based snapshots and dumps
 
 ### 3. Monitoring Stack
 
 **Prometheus Configuration**:
 
-- ServiceMonitor for automatic service discovery
+- Static configuration for service discovery
 - Custom metrics for business logic (transactions, registrations)
 - JVM metrics collection
 - Database metrics collection
@@ -162,89 +161,97 @@ management:
 
 ## Data Models
 
-### Kubernetes Resources
+### Docker Compose Configuration
 
-**Deployment Specification**:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mobile-banking-backend
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: mobile-banking-backend
-  template:
-    spec:
-      containers:
-        - name: backend
-          image: mobile-banking-backend:latest
-          ports:
-            - containerPort: 8080
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /api/actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /api/actuator/health/readiness
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-```
-
-**Service Configuration**:
+**Application Service**:
 
 ```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: mobile-banking-service
-  labels:
-    app: mobile-banking-backend
-spec:
-  selector:
-    app: mobile-banking-backend
-  ports:
-    - port: 80
-      targetPort: 8080
-      name: http
-    - port: 8080
-      targetPort: 8080
-      name: metrics
+version: "3.8"
+services:
+  mobile-banking-backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_USERNAME=mobilebanking
+      - DB_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=mobilebanking
+      - POSTGRES_USER=mobilebanking
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mobilebanking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+
+volumes:
+  postgres_data:
 ```
 
 ### Observability Configuration
 
-**ServiceMonitor for Prometheus**:
+**Prometheus Configuration**:
 
 ```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: mobile-banking-monitor
-spec:
-  selector:
-    matchLabels:
-      app: mobile-banking-backend
-  endpoints:
-    - port: metrics
-      path: /api/actuator/prometheus
-      interval: 30s
+prometheus:
+  image: prom/prometheus:latest
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus_data:/prometheus
+  command:
+    - "--config.file=/etc/prometheus/prometheus.yml"
+    - "--storage.tsdb.path=/prometheus"
+    - "--web.console.libraries=/etc/prometheus/console_libraries"
+    - "--web.console.templates=/etc/prometheus/consoles"
+
+grafana:
+  image: grafana/grafana:latest
+  ports:
+    - "3000:3000"
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  volumes:
+    - grafana_data:/var/lib/grafana
+    - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    - ./grafana/datasources:/etc/grafana/provisioning/datasources
 ```
 
-**Grafana Dashboard ConfigMap**:
+**Grafana Dashboard Configuration**:
 
 - Application performance metrics
 - JVM heap and garbage collection

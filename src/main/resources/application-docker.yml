@@ -7,9 +7,9 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
-  # PostgreSQL configuration for Kubernetes
+  # PostgreSQL configuration for Docker Compose
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres-service}:${DB_PORT:5432}/${DB_NAME:mobilebanking}
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:mobilebanking}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME:mobilebanking}
     password: ${DB_PASSWORD:password}
@@ -29,11 +29,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
+        "[format_sql]": false
         jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
+          "[batch_size]": 20
+        "[order_inserts]": true
+        "[order_updates]": true
     open-in-view: false
 
   # Flyway migration configuration
@@ -46,7 +46,7 @@ spring:
 
 # JWT configuration with environment variables
 jwt:
-  secret: ${JWT_SECRET:defaultSecretKeyForKubernetes123456789012345678901234567890}
+  secret: ${JWT_SECRET:defaultSecretKeyForDocker123456789012345678901234567890}
   expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
   validity:
     hours: ${JWT_VALIDITY_HOURS:24}
@@ -65,9 +65,9 @@ management:
       probes:
         enabled: true
   health:
-    readiness-state:
+    readinessstate:
       enabled: true
-    liveness-state:
+    livenessstate:
       enabled: true
     db:
       enabled: true
@@ -89,7 +89,7 @@ management:
       export:
         enabled: true
 
-# Logging configuration for Kubernetes
+# Logging configuration for Docker Compose
 logging:
   level:
     "[com.mobilebanking]": INFO
@@ -99,7 +99,6 @@ logging:
     "[org.springframework.boot.actuator]": INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
 
 # Server configuration
 server:
@@ -114,15 +113,13 @@ server:
     connection-timeout: 20000
     max-connections: 8192
 
-# Spring Boot graceful shutdown is configured in the main spring section
-
-# OpenTelemetry configuration for Kubernetes
+# OpenTelemetry configuration for Docker Compose
 otel:
   service:
     name: mobile-banking-backend
   exporter:
     otlp:
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger-collector:4317}
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4317}
   traces:
     exporter: otlp
   metrics:

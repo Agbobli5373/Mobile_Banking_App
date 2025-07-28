@@ -8,6 +8,7 @@ import com.mobilebanking.shared.domain.UserId;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.domain.UserName;
 import com.mobilebanking.user.infrastructure.UserRepository;
+import com.mobilebanking.observability.ObservabilityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,9 @@ class LoginServiceTest {
     @Mock
     private JwtTokenService jwtTokenService;
 
+    @Mock
+    private ObservabilityService observabilityService;
+
     private LoginService loginService;
     private User testUser;
     private String phoneNumber;
@@ -41,7 +45,7 @@ class LoginServiceTest {
 
     @BeforeEach
     void setUp() {
-        loginService = new LoginService(userRepository, authenticationService, jwtTokenService);
+        loginService = new LoginService(userRepository, authenticationService, jwtTokenService, observabilityService);
 
         phoneNumber = "+1234567890";
         pin = "123456";

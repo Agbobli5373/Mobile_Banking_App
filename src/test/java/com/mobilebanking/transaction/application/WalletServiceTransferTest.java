@@ -9,6 +9,7 @@ import com.mobilebanking.transaction.domain.MoneyTransferService;
 import com.mobilebanking.transaction.domain.Transaction;
 import com.mobilebanking.transaction.infrastructure.TransactionRepository;
 import com.mobilebanking.notification.domain.NotificationService;
+import com.mobilebanking.observability.ObservabilityService;
 import com.mobilebanking.user.domain.HashedPin;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.domain.UserName;
@@ -43,6 +44,9 @@ class WalletServiceTransferTest {
     private NotificationService notificationService;
 
     @Mock
+    private ObservabilityService observabilityService;
+
+    @Mock
     private Authentication authentication;
 
     private WalletService walletService;
@@ -71,7 +75,7 @@ class WalletServiceTransferTest {
 
         // Initialize the service with mocked dependencies
         walletService = new WalletService(userRepository, transactionRepository, moneyTransferService,
-                notificationService) {
+                notificationService, observabilityService) {
             @Override
             protected Authentication getAuthentication() {
                 return authentication;

@@ -17,7 +17,7 @@ import java.util.Optional;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaAuditing
-public class DatabaseConfig {
+public class JpaAuditingConfig {
 
     /**
      * Creates a JdbcTemplate bean for direct database access.

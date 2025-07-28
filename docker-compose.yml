@@ -1,0 +1,97 @@
+services:
+  # Mobile Banking Backend Application
+  mobile-banking-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mobile-banking-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=mobilebanking
+      - DB_USERNAME=mobilebanking
+      - DB_PASSWORD_FILE=/run/secrets/db_password
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=mobile-banking-backend
+      - OTEL_TRACES_EXPORTER=otlp
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom
+    secrets:
+      - db_password
+      - jwt_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+    networks:
+      - mobile-banking-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    environment:
+      - POSTGRES_DB=mobilebanking
+      - POSTGRES_USER=mobilebanking
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mobilebanking -d mobilebanking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.3"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    networks:
+      - mobile-banking-network
+    restart: unless-stopped
+
+# Docker Secrets for sensitive data
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
+
+# Docker Volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+
+# Docker Networks for service communication
+networks:
+  mobile-banking-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

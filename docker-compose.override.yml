@@ -1,0 +1,28 @@
+# Docker Compose Override for Development
+# This file is automatically loaded by docker-compose and provides development-specific configurations
+
+services:
+  mobile-banking-backend:
+    # Enable debug mode for development
+    environment:
+      - LOGGING_LEVEL_COM_MOBILEBANKING=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    # Mount source code for hot reload (if using Spring Boot DevTools)
+    volumes:
+      - ./logs:/app/logs
+    # Expose additional ports for debugging
+    ports:
+      - "8080:8080"
+      - "5005:5005" # Debug port
+
+  postgres:
+    # Enable PostgreSQL logging for development
+    environment:
+      - POSTGRES_LOG_STATEMENT=all
+      - POSTGRES_LOG_MIN_DURATION_STATEMENT=0
+    # Expose PostgreSQL port for external access
+    ports:
+      - "5432:5432"

@@ -16,7 +16,7 @@ public class ActuatorConfig {
      * Customizes the meter registry with common tags
      */
     @Bean
-    public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags(Environment environment) {
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags(Environment environment) {
         return registry -> registry.config()
                 .commonTags("application", "mobile-banking-backend")
                 .commonTags("environment",

@@ -3,6 +3,7 @@ package com.mobilebanking.auth.application;
 import com.mobilebanking.auth.domain.AuthenticationService;
 import com.mobilebanking.auth.domain.JwtTokenService;
 import com.mobilebanking.auth.domain.exception.InvalidCredentialsException;
+import com.mobilebanking.observability.ObservabilityService;
 import com.mobilebanking.shared.domain.PhoneNumber;
 import com.mobilebanking.user.domain.User;
 import com.mobilebanking.user.infrastructure.UserRepository;
@@ -19,14 +20,17 @@ public class LoginService {
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
     private final JwtTokenService jwtTokenService;
+    private final ObservabilityService observabilityService;
 
     public LoginService(
             UserRepository userRepository,
             AuthenticationService authenticationService,
-            JwtTokenService jwtTokenService) {
+            JwtTokenService jwtTokenService,
+            ObservabilityService observabilityService) {
         this.userRepository = userRepository;
         this.authenticationService = authenticationService;
         this.jwtTokenService = jwtTokenService;
+        this.observabilityService = observabilityService;
     }
 
     /**
@@ -56,15 +60,25 @@ public class LoginService {
                     .orElseThrow(InvalidCredentialsException::userNotFound);
 
             // Validate credentials
-            if (!authenticationService.validateCredentials(user, pin)) {
+            boolean isValid = authenticationService.validateCredentials(user, pin);
+            if (!isValid) {
+                // Record failed authentication
+                observabilityService.recordAuthentication(phoneNumber, false);
                 throw InvalidCredentialsException.invalidPhoneOrPin();
             }
+
+            // Record successful authentication
+            observabilityService.recordAuthentication(phoneNumber, true);
 
             // Generate JWT token
             return jwtTokenService.generateToken(user.getId());
         } catch (InvalidCredentialsException e) {
+            // Record failed authentication if not already recorded
+            observabilityService.recordAuthentication(phoneNumber, false);
             throw e;
         } catch (Exception e) {
+            // Record failed authentication for unexpected errors
+            observabilityService.recordAuthentication(phoneNumber, false);
             throw InvalidCredentialsException.invalidPhoneOrPin();
         }
     }
