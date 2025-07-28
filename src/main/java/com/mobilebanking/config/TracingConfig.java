@@ -20,11 +20,9 @@ import java.util.UUID;
 @Configuration
 public class TracingConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(TracingConfig.class);
-
     /**
      * Filter to add trace correlation IDs to MDC for structured logging
-     * This works with Spring Boot's auto-configured OpenTelemetry tracing
+     * This works with Spring Boot's autoconfigured OpenTelemetry tracing
      */
     @Bean
     OncePerRequestFilter traceCorrelationFilter() {

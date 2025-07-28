@@ -11,6 +11,8 @@ import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabl
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Objects;
+
 /**
  * Configuration for OpenTelemetry distributed tracing
  */
@@ -51,7 +53,7 @@ public class TracingConfiguration {
 
         public void addCustomAttribute(String key, String value) {
             if (tracer.currentSpan() != null) {
-                tracer.currentSpan().tag(key, value);
+                Objects.requireNonNull(tracer.currentSpan()).tag(key, value);
             }
         }
 

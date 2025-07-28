@@ -5,8 +5,8 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 /**
- * UserName value object that handles user name validation and formatting.
- * Ensures user names meet business requirements and validation rules.
+ * UserName value object that handles username validation and formatting.
+ * Ensures usernames meet business requirements and validation rules.
  */
 @Embeddable
 public final class UserName {
@@ -27,7 +27,7 @@ public final class UserName {
     /**
      * Creates a UserName from a string value.
      * 
-     * @param name the user name string
+     * @param name the username string
      * @return UserName instance
      * @throws InvalidUserNameException if name is invalid
      */
@@ -86,9 +86,9 @@ public final class UserName {
     }
 
     /**
-     * Gets the user name value.
+     * Gets the username value.
      * 
-     * @return the user name string
+     * @return the username string
      */
     public String getValue() {
         return value;

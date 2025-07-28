@@ -57,7 +57,7 @@ public class NotificationController {
         List<Notification> notifications = notificationService.getNotificationsForUser(userId);
         List<NotificationResponse> response = notifications.stream()
                 .map(NotificationResponse::fromDomain)
-                .collect(Collectors.toList());
+                .toList();
 
         logger.debug("Retrieved {} notifications for user: {}", response.size(), userId);
         return ResponseEntity.ok(response);

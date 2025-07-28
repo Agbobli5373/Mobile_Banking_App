@@ -1,5 +1,7 @@
 package com.mobilebanking.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -21,6 +23,9 @@ import java.util.Map;
  * available as environment properties.
  */
 public class DockerSecretsConfig implements EnvironmentPostProcessor {
+
+    // Logger for this class
+   private static final Logger logger = LoggerFactory.getLogger(DockerSecretsConfig.class);
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -69,7 +74,7 @@ public class DockerSecretsConfig implements EnvironmentPostProcessor {
                 return Files.readString(path).trim();
             }
         } catch (IOException e) {
-            System.err.println("Warning: Could not read secret from file: " + filePath + " - " + e.getMessage());
+            logger.error(e.getMessage());
         }
         return null;
     }
