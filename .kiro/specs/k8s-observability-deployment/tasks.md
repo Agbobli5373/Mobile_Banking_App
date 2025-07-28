@@ -49,7 +49,7 @@
   - Add PostgreSQL Exporter for database metrics
   - _Requirements: 2.2, 8.5_
 
-- [ ] 8. Set up Grafana dashboards service
+- [x] 8. Set up Grafana dashboards service
 
   - Add Grafana service to Docker Compose with persistent storage
   - Configure Prometheus data source automatically
