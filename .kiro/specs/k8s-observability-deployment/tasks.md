@@ -63,7 +63,7 @@
   - Set up trace sampling and propagation
   - _Requirements: 4.1, 4.2, 4.4_
 
-- [ ] 10. Set up centralized logging with Loki
+- [x] 10. Set up centralized logging with Loki
 
   - Add Loki service to Docker Compose
   - Configure log driver for container log collection

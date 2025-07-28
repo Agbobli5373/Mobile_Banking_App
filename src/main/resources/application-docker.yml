@@ -89,7 +89,7 @@ management:
       export:
         enabled: true
 
-# Logging configuration for Docker Compose
+# Logging configuration for Docker Compose with structured JSON logging
 logging:
   level:
     "[com.mobilebanking]": INFO
@@ -98,8 +98,9 @@ logging:
     "[org.springframework.web]": WARN
     "[org.springframework.boot.actuator]": INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    # JSON structured logging for Loki integration
+    console: '{"@timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","level":"%level","thread":"%thread","logger":"%logger","message":"%message","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","service":"mobile-banking-backend"}%n'
+  config: classpath:logback-spring.xml
 
 # Server configuration
 server:

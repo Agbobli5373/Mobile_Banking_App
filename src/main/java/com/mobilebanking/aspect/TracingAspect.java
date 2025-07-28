@@ -1,8 +1,6 @@
 package com.mobilebanking.aspect;
 
 import com.mobilebanking.config.TracingConfiguration.TracingHelper;
-import io.micrometer.tracing.annotation.NewSpan;
-import io.micrometer.tracing.annotation.SpanTag;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
