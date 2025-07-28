@@ -3,6 +3,7 @@
 
 -- Create additional extensions if needed
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Set timezone
 SET timezone = 'UTC';
@@ -19,3 +20,6 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mobilebanking;
 -- Set default privileges for future objects
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mobilebanking;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO mobilebanking;
+
+-- Grant access to pg_stat_statements for monitoring
+GRANT SELECT ON pg_stat_statements TO mobilebanking;

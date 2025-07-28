@@ -35,14 +35,14 @@
   - Set up environment variables and secrets management
   - _Requirements: 1.2, 1.3, 7.1, 9.1_
 
-- [ ] 6. Configure PostgreSQL database service
+- [x] 6. Configure PostgreSQL database service
 
   - Add PostgreSQL service to Docker Compose
   - Configure Docker volumes for data persistence
   - Set up database initialization scripts and environment variables
   - _Requirements: 1.4, 8.1, 8.3, 6.1_
 
-- [ ] 7. Configure Prometheus monitoring service
+- [x] 7. Configure Prometheus monitoring service
 
   - Add Prometheus service to Docker Compose
   - Write Prometheus configuration with static service discovery

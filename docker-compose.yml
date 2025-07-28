@@ -51,11 +51,14 @@ services:
       - POSTGRES_DB=mobilebanking
       - POSTGRES_USER=mobilebanking
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      # Enable logging for monitoring
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
     secrets:
       - db_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - ./docker/postgres/conf:/etc/postgresql/conf.d
     ports:
       - "5432:5432"
     healthcheck:
@@ -76,16 +79,126 @@ services:
       - mobile-banking-network
     restart: unless-stopped
 
+  # PostgreSQL Exporter for Prometheus metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://mobilebanking:mobilebanking_secure_password_2024@postgres:5432/mobilebanking?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9187/metrics",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.1"
+        reservations:
+          memory: 64M
+          cpus: "0.05"
+    networks:
+      - mobile-banking-network
+    restart: unless-stopped
+
+  # Prometheus Monitoring Service
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
+    depends_on:
+      - mobile-banking-backend
+      - postgres-exporter
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.3"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    networks:
+      - mobile-banking-network
+    restart: unless-stopped
+
+  # Database Backup Service (optional - can be run manually or via cron)
+  postgres-backup:
+    image: postgres:15-alpine
+    container_name: postgres-backup
+    environment:
+      - PGPASSFILE=/run/secrets/pgpass
+    secrets:
+      - pgpass
+    volumes:
+      - ./docker/postgres/backup.sh:/backup.sh:ro
+      - postgres_backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mobile-banking-network
+    profiles:
+      - backup
+    command: ["sh", "/backup.sh"]
+
 # Docker Secrets for sensitive data
 secrets:
   db_password:
     file: ./secrets/db_password.txt
   jwt_secret:
     file: ./secrets/jwt_secret.txt
+  pgpass:
+    file: ./secrets/pgpass
 
 # Docker Volumes for data persistence
 volumes:
   postgres_data:
+    driver: local
+  postgres_backups:
+    driver: local
+  prometheus_data:
     driver: local
 
 # Docker Networks for service communication

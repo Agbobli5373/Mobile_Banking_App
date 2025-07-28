@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  # Mobile Banking Backend Application
+  - job_name: "mobile-banking-backend"
+    static_configs:
+      - targets: ["mobile-banking-backend:8080"]
+    metrics_path: "/api/actuator/prometheus"
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # PostgreSQL Database Metrics
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Prometheus Self-Monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+    scrape_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
