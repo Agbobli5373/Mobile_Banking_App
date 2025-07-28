@@ -126,6 +126,9 @@ otel:
     exporter: none
   logs:
     exporter: none
+  instrumentation:
+    jdbc:
+      enabled: false
 
 # OpenAPI documentation
 springdoc:
