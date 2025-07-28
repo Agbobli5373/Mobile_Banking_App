@@ -56,7 +56,7 @@
   - Import pre-built dashboards for Spring Boot and PostgreSQL metrics
   - _Requirements: 3.1, 3.2_
 
-- [ ] 9. Configure distributed tracing with Jaeger
+- [x] 9. Configure distributed tracing with Jaeger
 
   - Add Jaeger all-in-one service to Docker Compose
   - Configure OpenTelemetry agent in application for Jaeger endpoint

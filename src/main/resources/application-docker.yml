@@ -99,6 +99,7 @@ logging:
     "[org.springframework.boot.actuator]": INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
 
 # Server configuration
 server:
@@ -114,21 +115,26 @@ server:
     max-connections: 8192
 
 # OpenTelemetry configuration for Docker Compose
-otel:
-  service:
-    name: mobile-banking-backend
-  exporter:
-    otlp:
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4317}
-  traces:
-    exporter: otlp
-  metrics:
-    exporter: none
-  logs:
-    exporter: none
+management:
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4318}
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACES_SAMPLER_ARG:0.1}
   instrumentation:
     jdbc:
-      enabled: false
+      enabled: true
+    spring-web:
+      enabled: true
+    spring-webmvc:
+      enabled: true
+    spring-data-jpa:
+      enabled: true
+    hikaricp:
+      enabled: true
+    logback:
+      enabled: true
 
 # OpenAPI documentation
 springdoc:

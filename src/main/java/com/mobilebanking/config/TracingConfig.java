@@ -27,7 +27,7 @@ public class TracingConfig {
      * This works with Spring Boot's auto-configured OpenTelemetry tracing
      */
     @Bean
-    public OncePerRequestFilter traceCorrelationFilter() {
+    OncePerRequestFilter traceCorrelationFilter() {
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request,
